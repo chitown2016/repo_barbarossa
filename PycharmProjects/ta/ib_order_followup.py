@@ -17,7 +17,7 @@ class ib_order_follow_up(subs.subscription):
 
     trade_frame = pd.DataFrame()
 
-    trade_assignment_by_tickerhead = {'LC': "LCJ19G19VCS"}
+    trade_assignment_by_tickerhead = {'LN': "LNQ19V19VCS"}
 
     def orderStatus(self, orderId: OrderId, status: str, filled: float,remaining: float, avgFillPrice: float, permId: int,parentId: int, lastFillPrice: float, clientId: int,whyHeld: str, mktCapPrice: float):
         super().orderStatus(orderId, status, filled, remaining,avgFillPrice, permId, parentId, lastFillPrice, clientId, whyHeld, mktCapPrice)
@@ -57,7 +57,7 @@ class ib_order_follow_up(subs.subscription):
         trade_frame['ticker_head'] = [cmi.get_contract_specs(x)['ticker_head'] for x in trade_frame['ticker']]
 
         if pth.exists(self.trade_file):
-            order_frame = pd.read_csv(self.trade_file,names=['order_id','ticker','urgency','strategy_class'])
+            order_frame = pd.read_csv(self.trade_file,names=['order_id','ticker','urgency','alias','strategy_class','strategy_description'])
 
             print(order_frame['order_id'])
             print(trade_frame['order_id'])
@@ -73,7 +73,7 @@ class ib_order_follow_up(subs.subscription):
                 trade_frame.loc[trade_frame['ticker_head'] == key,'alias'] = value
 
         else:
-            trade_frame['alias'] = 'delta_Oct18_2'
+            trade_frame['alias'] = ''
 
         trade_frame = trade_frame[pd.notnull(trade_frame['alias'])]
         trade_frame.reset_index(inplace=True, drop=True)
@@ -83,7 +83,6 @@ class ib_order_follow_up(subs.subscription):
 
 
     def main_run(self):
-        print('HERE')
         self.reqAllOpenOrders()
         self.reqExecutions(self.next_valid_id(), ExecutionFilter())
 
@@ -93,7 +92,10 @@ def test_ib_order_follow_up():
     date_now = cu.get_doubledate()
     con = msu.get_my_sql_connection()
     delta_strategy_frame = ts.get_filtered_open_strategies(as_of_date=date_now, con=con, strategy_class_list=['delta'])
-    app.delta_alias = delta_strategy_frame['alias'].iloc[-1]
+
+    if len(delta_strategy_frame.index)>0:
+        app.delta_alias = delta_strategy_frame['alias'].iloc[-1]
+
     ta_folder = dn.get_dated_directory_extension(folder_date=date_now, ext='ta')
     app.trade_file = ta_folder + '/trade_dir.csv'
     app.con = con

@@ -54,7 +54,9 @@ class Algo(subs.subscription):
     # increased size %8 on July 2nd 2018
     # increased size %10 (150->165) on October 1st 2018
     # increase size by %15 (165->190) on November 1st 2018
-    total_traded_volume_max_before_user_confirmation = 90
+    # increase size by %15 (190->220) on January 2nd 2019
+    # increase size by %100 (220->440) on February 19th 2019
+    total_traded_volume_max_before_user_confirmation = 250
     total_traded_volume_since_last_confirmation = 0
     total_volume_traded = 0
     max_num_bets = 3
@@ -345,51 +347,75 @@ class Algo(subs.subscription):
                 else:
                     continue
 
+            if (z_score < -1) and (z_score <= z_score_s) and (qCarry <= -9) and (normalized_butterfly_price < butterfly_q25) and (min_avg_volume >= self.min_avg_volume_limit) and (self.num_bets < self.max_num_bets):
+
+                self.log.info(back_spread_ticker + ' might be a good short')
+                self.log.info('working position short: ' + str(working_position_short))
+                trade_quantity = min(mth.ceil((self.bet_size - total_risk_short) / dollar_noise100),
+                                     self.total_traded_volume_max_before_user_confirmation)
+                self.log.info('trade quantity: ' + str(trade_quantity))
+
+            if (z_score > 1) and (z_score >= z_score_s) and (qCarry >= 19) and (normalized_butterfly_price > butterfly_q75) and (min_avg_volume >= self.min_avg_volume_limit) and (ticker_head not in ['CL', 'HO', 'NG']) and (self.num_bets < self.max_num_bets):
+                self.log.info(back_spread_ticker + ' might be a good long')
+                self.log.info('working position long: ' + str(working_position_long))
+                trade_quantity = min(mth.ceil((self.bet_size - total_risk_long) / dollar_noise100),
+                                     self.total_traded_volume_max_before_user_confirmation)
+                self.log.info('trade quantity: ' + str(trade_quantity))
 
             # new sell entry orders
-            if (z_score < -1) and (z_score<=z_score_s) and (qCarry<=-9) and (normalized_butterfly_price<butterfly_q25) and (min_avg_volume>=self.min_avg_volume_limit) and (total_position_short <= 0) and (working_position_short == 0) and (
+            if (z_score < -1) and (z_score<=z_score_s) and (qCarry<=-9) and (normalized_butterfly_price<butterfly_q25) and (min_avg_volume>=self.min_avg_volume_limit) and (working_position_short == 0) and (
                 self.num_bets < self.max_num_bets):
-                if self.total_traded_volume_since_last_confirmation+target_quantity < self.total_traded_volume_max_before_user_confirmation:
-                    self.ocs_portfolio.order_send(ticker=ticker_head + '_short', qty=target_quantity)
-                    self.ocs_alias_portfolio.order_send(ticker=back_spread_ticker + '_short', qty=target_quantity)
-                    self.ocs_risk_portfolio.order_send(ticker=ticker_head + '_short', qty=target_quantity*dollar_noise100)
+
+
+                #self.log.info(self.total_traded_volume_max_before_user_confirmation)
+
+                trade_quantity = min(mth.ceil((self.bet_size-total_risk_short)/dollar_noise100),self.total_traded_volume_max_before_user_confirmation)
+
+                if (self.total_traded_volume_since_last_confirmation+trade_quantity < self.total_traded_volume_max_before_user_confirmation) and (trade_quantity > 0):
+
+                    self.ocs_portfolio.order_send(ticker=ticker_head + '_short', qty=trade_quantity)
+                    self.ocs_alias_portfolio.order_send(ticker=back_spread_ticker + '_short', qty=trade_quantity)
+                    self.ocs_risk_portfolio.order_send(ticker=ticker_head + '_short', qty=trade_quantity*dollar_noise100)
                     self.log.info('real order!! id:' + str(self.next_val_id))
                     self.log.info('total_position_short:' + str(total_position_short) + ', working_position_short: ' + str(working_position_short))
                     overnight_calendars.loc[i, 'working_order_id'] = self.next_val_id
                     self.order_filled_dictionary[self.next_val_id] = 0
 
                     if (z_score_b<-1) and (z_score_b<=z_score_s) and (normalized_butterfly_price_b<butterfly_q25) and (bid_quantity<(ask_quantity/2)) and (bid_ask_in_ticks<1.1):
-                        self.placeOrder(self.next_valid_id(), spread_contract, ib_api_trade.ComboLimitOrder('SELL', target_quantity, bid_price, False))
+                        self.placeOrder(self.next_valid_id(), spread_contract, ib_api_trade.ComboLimitIcebergOrder('SELL', trade_quantity,min(bid_quantity,trade_quantity), bid_price, False))
                     else:
-                        self.placeOrder(self.next_valid_id(), spread_contract,ib_api_trade.ComboLimitOrder('SELL', target_quantity, ask_price, False))
+                        self.placeOrder(self.next_valid_id(), spread_contract,ib_api_trade.ComboLimitIcebergOrder('SELL', trade_quantity,min(bid_quantity,trade_quantity) ,ask_price, False))
 
-                    self.total_volume_traded += target_quantity
-                    self.total_traded_volume_since_last_confirmation += target_quantity
+                    self.total_volume_traded += trade_quantity
+                    self.total_traded_volume_since_last_confirmation += trade_quantity
                     self.num_bets += 1
                     self.log.info(back_spread_ticker + ' is a sell, Spread Price: %.4f' % spread_price + ', Butterfly Price: %.4f' % butterfly_price + ', z_score: %.2f' % z_score + ', z_score_b: %.2f' % z_score_b)
 
             # new buy entry orders
-            if (z_score > 1)  and (z_score>=z_score_s) and (qCarry>=19) and (normalized_butterfly_price>butterfly_q75)  and (min_avg_volume>=self.min_avg_volume_limit) and (ticker_head not in ['CL', 'HO', 'NG']) and (total_position_long <= 0) and (working_position_long == 0) and (self.num_bets < self.max_num_bets):
-                if self.total_traded_volume_since_last_confirmation+target_quantity < self.total_traded_volume_max_before_user_confirmation:
-                    self.ocs_portfolio.order_send(ticker=ticker_head + '_long', qty=target_quantity)
-                    self.ocs_alias_portfolio.order_send(ticker=back_spread_ticker + '_long', qty=target_quantity)
-                    self.ocs_risk_portfolio.order_send(ticker=ticker_head + '_long',qty=target_quantity * dollar_noise100)
+            if (z_score > 1)  and (z_score>=z_score_s) and (qCarry>=19) and (normalized_butterfly_price>butterfly_q75)  and (min_avg_volume>=self.min_avg_volume_limit) and (ticker_head not in ['CL', 'HO', 'NG']) and (working_position_long == 0) and (self.num_bets < self.max_num_bets):
+
+                trade_quantity = min(mth.ceil((self.bet_size - total_risk_long) / dollar_noise100),self.total_traded_volume_max_before_user_confirmation)
+
+                if (self.total_traded_volume_since_last_confirmation+trade_quantity < self.total_traded_volume_max_before_user_confirmation) and (trade_quantity>0):
+                    self.ocs_portfolio.order_send(ticker=ticker_head + '_long', qty=trade_quantity)
+                    self.ocs_alias_portfolio.order_send(ticker=back_spread_ticker + '_long', qty=trade_quantity)
+                    self.ocs_risk_portfolio.order_send(ticker=ticker_head + '_long',qty=trade_quantity * dollar_noise100)
                     self.log.info('real order!! id:' + str(self.next_val_id))
                     self.log.info('total_position_long:' + str(total_position_long) + ', working_position_long: ' + str(working_position_long))
                     overnight_calendars.loc[i, 'working_order_id'] = self.next_val_id
                     self.order_filled_dictionary[self.next_val_id] = 0
 
                     if (z_score_a>1) and (z_score_a>=z_score_s) and (normalized_butterfly_price_a>butterfly_q75) and (ask_quantity<(bid_quantity/2)) and (bid_ask_in_ticks<1.1):
-                        self.placeOrder(self.next_valid_id(), spread_contract, ib_api_trade.ComboLimitOrder('BUY', target_quantity, ask_price, False))
+                        self.placeOrder(self.next_valid_id(), spread_contract, ib_api_trade.ComboLimitIcebergOrder('BUY', trade_quantity, min(trade_quantity, ask_quantity), ask_price, False))
                     else:
-                        self.placeOrder(self.next_valid_id(), spread_contract, ib_api_trade.ComboLimitOrder('BUY', target_quantity, bid_price, False))
+                        self.placeOrder(self.next_valid_id(), spread_contract, ib_api_trade.ComboLimitIcebergOrder('BUY', trade_quantity, min(trade_quantity, ask_quantity), bid_price, False))
 
-                    self.total_volume_traded += target_quantity
-                    self.total_traded_volume_since_last_confirmation += target_quantity
+                    self.total_volume_traded += trade_quantity
+                    self.total_traded_volume_since_last_confirmation += trade_quantity
                     self.num_bets += 1
                     self.log.info(back_spread_ticker + ' is a buy, Spread Price: %.4f' % spread_price + ', Butterfly Price: %.4f' % butterfly_price + ', z_score: %.2f' % z_score + ', z_score_a: %.2f' % z_score_a)
 
-            # cancel working short entry orders before exiting filled position to ensure correct acconting
+            # cancel working short entry orders before exiting filled position to ensure correct accounting
             if (working_alias_short>0) and (total_alias_short>0):
                 self.log.info('Monitor Existing Short Entry Orders: ' + back_spread_ticker + ', Spread Price: %.4f' % spread_price + ', Butterfly Price: %.4f' % butterfly_price + ', z_score: %.2f' % z_score)
 
@@ -401,7 +427,7 @@ class Algo(subs.subscription):
                     self.ocs_alias_portfolio.order_send(ticker=back_spread_ticker + '_short', qty=-working_alias_short)
                     self.ocs_risk_portfolio.order_send(ticker=ticker_head + '_short',qty=-working_alias_short * dollar_noise100)
 
-            # cancel working long entry orders before exiting filled position to ensure correct acconting
+            # cancel working long entry orders before exiting filled position to ensure correct accounting
             if (working_alias_long > 0) and (total_alias_long > 0):
                 self.log.info('Monitor Existing Long Entry Orders: ' + back_spread_ticker + ', Spread Price: %.4f' % spread_price + ', Butterfly Price: %.4f' % butterfly_price + ', z_score: %.2f' % z_score)
 
@@ -426,7 +452,7 @@ class Algo(subs.subscription):
                     self.log.info(back_spread_ticker + ' normalized, closing position')
                     overnight_calendars.loc[i, 'working_order_id'] = self.next_val_id
                     self.order_filled_dictionary[self.next_val_id] = 0
-                    self.placeOrder(self.next_valid_id(), spread_contract,ib_api_trade.ComboLimitOrder('BUY', filled_alias_short, bid_price, False))
+                    self.placeOrder(self.next_valid_id(), spread_contract,ib_api_trade.ComboLimitIcebergOrder('BUY', filled_alias_short, min(filled_alias_short,ask_quantity), bid_price, False))
                     self.total_volume_traded += filled_alias_short
                     self.total_traded_volume_since_last_confirmation += filled_alias_short
                     self.ocs_portfolio.order_send(ticker=ticker_head + '_short', qty=-filled_alias_short)
@@ -444,7 +470,7 @@ class Algo(subs.subscription):
                     self.log.info(back_spread_ticker + ' normalized, closing position')
                     overnight_calendars.loc[i, 'working_order_id'] = self.next_val_id
                     self.order_filled_dictionary[self.next_val_id] = 0
-                    self.placeOrder(self.next_valid_id(), spread_contract,ib_api_trade.ComboLimitOrder('SELL', filled_alias_long, bid_price, False))
+                    self.placeOrder(self.next_valid_id(), spread_contract,ib_api_trade.ComboLimitIcebergOrder('SELL', filled_alias_long, min(filled_alias_long,bid_quantity), bid_price, False))
                     self.total_volume_traded += filled_alias_long
                     self.total_traded_volume_since_last_confirmation += filled_alias_long
                     self.ocs_portfolio.order_send(ticker=ticker_head + '_long', qty=-filled_alias_long)

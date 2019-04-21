@@ -54,9 +54,11 @@ class Algo(subs.subscription):
         "PermId:", permId, "ParentId:", parentId, "LastFillPrice:",
         lastFillPrice, "ClientId:", clientId, "WhyHeld:", whyHeld)
 
+        print(status)
+
         if status == 'Submitted':
             with open(self.trade_file, 'a') as file:
-                file.write(str(orderId) + ',,0,'  + str(self.order_alias_dictionary[orderId]) + ',strategy_class=vcs&betsize='+ str(self.vcs_risk_parameter))
+                file.write(str(orderId) + ',,0,'  + str(self.order_alias_dictionary[orderId]) + 'vcs,strategy_class=vcs&betsize='+ str(self.vcs_risk_parameter))
                 file.write('\n')
 
     def tickPrice(self, reqId: TickerId, tickType: TickType, price: float,attrib: TickAttrib):

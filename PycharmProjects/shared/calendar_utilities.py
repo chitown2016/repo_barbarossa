@@ -2,7 +2,7 @@ __author__ = 'kocat_000'
 
 import datetime as dt
 
-three_letter_month_dictionary = {"MAR": 3,"MAY": 5}
+three_letter_month_dictionary = {"JAN": 1, "MAR": 3,"MAY": 5, 'JUL': 7 , 'SEP': 9 ,'OCT':10,'NOV': 11, 'DEC': 12}
 
 
 def convert_doubledate_2datetime(double_date):
@@ -12,6 +12,15 @@ def convert_doubledate_2datetime(double_date):
 def doubledate_shift(double_date, shift_in_days):
     shifted_datetime = convert_doubledate_2datetime(double_date)-dt.timedelta(shift_in_days)
     return int(shifted_datetime.strftime('%Y%m%d'))
+
+def get_datetime_shift(**kwargs):
+
+    if 'reference_date' in kwargs.keys():
+        reference_date = kwargs['reference_date']
+    else:
+        reference_date = dt.datetime.now()
+
+    return reference_date-dt.timedelta(kwargs['shift_in_days'])
 
 
 def convert_datestring_format(cu_input):

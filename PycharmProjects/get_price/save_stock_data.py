@@ -152,7 +152,7 @@ def get_stock_price(**kwargs):
                                  '8. split coefficient': 'split_coefficient'}, inplace=True)
         data_out['settle_datetime'] = [dt.datetime.strptime(x, '%Y-%m-%d') for x in data_out['settle_date']]
     elif data_source == 'iex':
-        data_out = web.DataReader(symbol, data_source='iex', start='01/01/2013')
+        data_out = web.DataReader(symbol, data_source='iex', start=dt.datetime.strftime(cu.get_datetime_shift(shift_in_days=5*365),'%m/%d/%Y'))
         data_out['settle_datetime'] = [dt.datetime.strptime(x, '%Y-%m-%d') for x in data_out.index]
         data_out.set_index('settle_datetime',drop=False,inplace=True)
 

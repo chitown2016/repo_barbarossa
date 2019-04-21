@@ -63,7 +63,7 @@ class Algo(subs.subscription):
 
         if status in ['Submitted','PreSubmitted']:
             with open(self.trade_file, 'a') as file:
-                file.write(str(orderId) + ',' + self.order_ticker_dictionary[orderId] + ',' + str(self.order_urgency_dictionary[orderId]) + ',delta_hedge')
+                file.write(str(orderId) + ',' + self.order_ticker_dictionary[orderId] + ',' + str(self.order_urgency_dictionary[orderId]) + ',' + self.delta_alias + ',delta_hedge,strategy_class=delta')
                 file.write('\n')
 
         print(orderId)

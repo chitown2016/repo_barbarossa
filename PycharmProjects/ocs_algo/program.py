@@ -109,8 +109,8 @@ def main():
                 overnight_calendars.loc[selection_indx, 'alias'] = open_strategy_frame['alias'].iloc[i]
                 overnight_calendars.loc[selection_indx, 'holding_period'] = holding_period
 
-                app.ocs_risk_portfolio.order_send(ticker=position_name, qty=abs(position_manager_output['scale']*overnight_calendars.loc[selection_indx, 'dollarNoise100']))
-                app.ocs_risk_portfolio.order_fill(ticker=position_name, qty=abs(position_manager_output['scale']*overnight_calendars.loc[selection_indx, 'dollarNoise100']))
+                app.ocs_risk_portfolio.order_send(ticker=position_name, qty=abs(position_manager_output['scale']*overnight_calendars.loc[selection_indx, 'dollarNoise100'].values[0]))
+                app.ocs_risk_portfolio.order_fill(ticker=position_name, qty=abs(position_manager_output['scale']*overnight_calendars.loc[selection_indx, 'dollarNoise100'].values[0]))
 
             else:
                 for j in range(len(overnight_calendars_list)):
@@ -123,8 +123,8 @@ def main():
                         overnight_calendars_past.loc[selection_indx, 'holding_period'] = holding_period
 
 
-                        app.ocs_risk_portfolio.order_send(ticker=position_name, qty=abs(position_manager_output['scale'] * overnight_calendars_past.loc[selection_indx, 'dollarNoise100']))
-                        app.ocs_risk_portfolio.order_fill(ticker=position_name, qty=abs(position_manager_output['scale'] * overnight_calendars_past.loc[selection_indx, 'dollarNoise100']))
+                        app.ocs_risk_portfolio.order_send(ticker=position_name, qty=abs(position_manager_output['scale'] * overnight_calendars_past.loc[selection_indx, 'dollarNoise100'].values[0]))
+                        app.ocs_risk_portfolio.order_fill(ticker=position_name, qty=abs(position_manager_output['scale'] * overnight_calendars_past.loc[selection_indx, 'dollarNoise100'].values[0]))
 
                         if j>1:
                             overnight_calendars_past.loc[selection_indx,'butterflyMean'] = np.nan

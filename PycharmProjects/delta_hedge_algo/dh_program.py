@@ -16,7 +16,7 @@ def main():
     con = msu.get_my_sql_connection()
     date_now = cu.get_doubledate()
 
-    contract_frame = tsh.get_intraday_data_contract_frame(con=con)
+    contract_frame = tsh.get_intraday_data_contract_frame()
 
     contract_frame = dh_ut.calculate_contract_risk(contract_frame=contract_frame, current_date=date_now)
 

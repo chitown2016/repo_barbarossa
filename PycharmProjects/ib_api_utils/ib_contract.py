@@ -37,7 +37,7 @@ ib_option_trading_class_dictionary = {'AD': 'ADU','CD': 'CAU', 'EC': 'EUU', 'BP'
                                     'CL': 'LO', 'NG': 'ON', 'GC': 'OG', 'SI': 'SO', 'ES': 'ES',
                                     'TU': 'OZT', 'FV': 'OZF', 'TY': 'OZN', 'US': 'OZB'}
 
-ib_strike_multiplier_dictionary = {'JY': 0.0000001, 'LN': 0.01, 'LC': 0.01}
+ib_strike_multiplier_dictionary = {'JY': 0.0000001, 'LN': 0.01, 'LC': 0.01, 'W': 0.01}
 
 ib_multiplier_dictionary = {'BO': '60000','SM': '100', 'C': '5000', 'S': '5000','W': '5000', 'LC': '40000', 'LN': '40000', 'TY': '1000', 'HO': '42000', 'ES': '50'}
 
@@ -103,6 +103,12 @@ def get_db_ticker_from_ib_contract(**kwargs):
     contract_output['strike'] = None
 
     sec_type = ib_contract.secType
+
+
+    if sec_type=='STK':
+        contract_output['ticker'] = ib_contract.symbol
+        contract_output['instrument'] = 'S'
+        return contract_output
 
     ticker_head = conversion_from_ib_ticker_head[ib_contract.symbol]
     local_symbol_out = ib_contract.localSymbol.split(' ')

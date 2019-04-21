@@ -16,16 +16,14 @@ def get_stock_price_preloaded(**kwargs):
     else:
         data_source = 'iex'
 
+    if data_source == 'iex':
+        file_dir = dn.get_directory_name(ext='iex_stock_data')
+    else:
+        file_dir = dn.get_directory_name(ext='stock_data')
 
     if 'stock_data_dictionary' in kwargs.keys():
         data_out = kwargs['stock_data_dictionary'][ticker]
     else:
-        if data_source=='iex':
-            file_dir = dn.get_directory_name(ext='iex_stock_data')
-        else:
-            file_dir = dn.get_directory_name(ext='stock_data')
-
-
         if not os.path.isfile(file_dir + '/' + ticker + '.pkl'):
             ssd.save_stock_data(symbol_list=[ticker],data_source=data_source)
         data_out = pd.read_pickle(file_dir + '/' + ticker + '.pkl')
