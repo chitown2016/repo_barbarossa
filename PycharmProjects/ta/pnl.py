@@ -417,9 +417,16 @@ def get_strategy_pnl(**kwargs):
         pnl_frame = pd.DataFrame(pnl_path)
         pnl_frame['settle_date'] = bus_day_list
 
+        daily_index = pnl_frame['settle_date'] == as_of_date
+
+        if sum(daily_index) == 0:
+            daily_pnl = np.nan
+        else:
+            daily_pnl = pnl_frame['total_pnl'].values[-1]
+
         output_dictionary = {'pnl_frame': pnl_frame[['settle_date','position_pnl','intraday_pnl','t_cost','total_pnl']],
             'pnl_per_tickerhead': pnl_per_tickerhead,
-            'daily_pnl': pnl_frame['total_pnl'].values[-1],
+            'daily_pnl': daily_pnl,
             'total_pnl': pnl_frame['total_pnl'].sum()}
 
     if 'con' not in kwargs.keys():

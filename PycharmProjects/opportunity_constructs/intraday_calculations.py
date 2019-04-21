@@ -37,7 +37,11 @@ def get_intraday_vcs(**kwargs):
 
     filter_out = of.get_vcs_filters(data_frame_input=pd.DataFrame.from_dict({'tickerHead': [ticker_head],
                                                                              'tickerClass': [ticker_class],
-                                                                              'Q': [q], 'Q1': [q1]}), filter_list=['long2', 'short2'])
+                                                                              'Q': [q], 'Q1': [q1],
+                                                                             'fwdVolQ': vcs_output['fwd_vol_q'],
+                                                                             'atmVolRatio':vcs_output['atm_vol_ratio'],
+                                                                             'downside': vcs_output['downside'],
+                                                                             'upside': vcs_output['upside']}), filter_list=['long2', 'short2'])
 
     if filter_out['selected_frame'].empty:
         validQ = False

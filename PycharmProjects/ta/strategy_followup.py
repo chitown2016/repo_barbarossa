@@ -53,7 +53,7 @@ def get_results_4strategy(**kwargs):
 
     strategy_class = strategy_info_dict['strategy_class']
 
-    pnl_frame = tpm.get_daily_pnl_snapshot(as_of_date=date_to, broker=broker)
+    pnl_frame = tpm.get_daily_pnl_snapshot(as_of_date=date_to, broker=broker, name='final')
     pnl_frame = pnl_frame[pnl_frame['alias']==kwargs['alias']]
     strategy_position = ts.get_net_position_4strategy_alias(alias=kwargs['alias'],as_of_date=date_to)
 

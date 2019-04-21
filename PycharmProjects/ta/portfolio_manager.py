@@ -20,8 +20,10 @@ def get_daily_pnl_snapshot(**kwargs):
 
     ta_output_dir = dn.get_dated_directory_extension(folder_date=as_of_date,ext='ta')
 
-    if os.path.isfile(ta_output_dir + '/portfolio_pnl.pkl'):
-        strategy_frame = pd.read_pickle(ta_output_dir + '/portfolio_pnl.pkl')
+    file_name = '/portfolio_pnl_' + kwargs['name'] + '.pkl'
+
+    if os.path.isfile(ta_output_dir + file_name):
+        strategy_frame = pd.read_pickle(ta_output_dir + file_name)
         return strategy_frame
 
     strategy_frame = ts.get_open_strategies(**kwargs)
@@ -36,7 +38,7 @@ def get_daily_pnl_snapshot(**kwargs):
     if len(strategy_frame.index)>0:
         strategy_frame.loc[max(strategy_frame.index)+1] = ['TOTAL', strategy_frame['daily_pnl'].sum(), strategy_frame['total_pnl'].sum()]
 
-    strategy_frame.to_pickle(ta_output_dir + '/portfolio_pnl.pkl')
+    strategy_frame.to_pickle(ta_output_dir + file_name)
 
     return strategy_frame
 

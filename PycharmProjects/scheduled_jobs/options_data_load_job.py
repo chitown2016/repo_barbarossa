@@ -22,6 +22,8 @@ import get_price.presave_price as pp
 import opportunity_constructs.vcs as vcs
 import formats.options_strategy_formats as osf
 import formats.futures_strategy_formats as fsf
+import formats.risk_pnl_formats as rpf
+import ta.email_reports as er
 import ta.prepare_daily as prep
 
 commodity_address = 'ftp://ftp.cmegroup.com/pub/settle/stlags'
@@ -131,5 +133,14 @@ try:
 except Exception:
     log.error('generate_ifs failed', exc_info=True)
     pass
+
+try:
+    log.info('generate early pnl report')
+    rpf.generate_portfolio_pnl_report(as_of_date=folder_date, con=con, name='early')
+    er.send_hrsn_early_report(report_date=folder_date)
+except Exception:
+    log.error('generate early pnl report', exc_info=True)
+    pass
+
 
 con.close()

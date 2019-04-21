@@ -1,6 +1,7 @@
 
 import shared.directory_names as dn
 import shared.utils as su
+import shared.calendar_utilities as cu
 import pandas as pd
 import os as os
 import datetime as dt
@@ -222,6 +223,62 @@ def get_formatted_tt_fills(**kwargs):
     return {'raw_trades': fill_frame, 'aggregate_trades': aggregate_trades}
 
 
+def get_tagged_tt_fills(**kwargs):
+
+    fill_frame = load_latest_tt_fills(**kwargs)
+
+    str_indx = fill_frame['Contract'].values[0].find('-')
+
+    if str_indx == 2:
+        date_format = '%y-%b'
+    elif str_indx == -1:
+        date_format = '%b%y'
+
+    datetime_conversion = [dt.datetime.strptime(x,date_format) for x in fill_frame['Contract']]
+    fill_frame['ticker_year'] = [x.year for x in datetime_conversion]
+    fill_frame['ticker_month'] = [x.month for x in datetime_conversion]
+    fill_frame['ticker_head'] = [conversion_from_tt_ticker_head[x] for x in fill_frame['Product']]
+
+    fill_frame['ticker'] = [fill_frame.loc[x,'ticker_head'] +
+                            cmi.full_letter_month_list[fill_frame.loc[x,'ticker_month']-1] +
+                            str(fill_frame.loc[x,'ticker_year']) for x in fill_frame.index]
+
+    fill_frame['trade_price'] = [convert_trade_price_from_tt(price=fill_frame.loc[x,'Price'],ticker_head=fill_frame.loc[x,'ticker_head'])
+                                 for x in fill_frame.index]
+
+    fill_frame['PQ'] = fill_frame['trade_price']*fill_frame['Qty']
+
+    grouped = fill_frame.groupby(['ticker','B/S', 'Order Tag'])
+
+    aggregate_trades = pd.DataFrame()
+    aggregate_trades['trade_price'] = grouped['PQ'].sum()/grouped['Qty'].sum()
+    aggregate_trades['trade_quantity'] = grouped['Qty'].sum()
+
+    aggregate_trades.loc[(slice(None),'S'),'trade_quantity']=-aggregate_trades.loc[(slice(None),'S'),'trade_quantity']
+    aggregate_trades['ticker'] = grouped['ticker'].first()
+    aggregate_trades['ticker_head'] = grouped['ticker_head'].first()
+    aggregate_trades['order_tag'] = grouped['Order Tag'].first()
+    aggregate_trades['instrument'] = [product_type_instrument_conversion[x] for x in grouped['Product Type'].first()]
+
+    aggregate_trades['option_type'] = None
+    aggregate_trades['strike_price'] = None
+    aggregate_trades['real_tradeQ'] = True
+
+    ta_directory = dn.get_dated_directory_extension(ext='ta', folder_date=cu.get_doubledate())
+    trade_alias_frame = pd.read_csv(ta_directory + '/tradeAlias.csv')
+
+    combined_list = [None]*len(trade_alias_frame.index)
+
+    for i in range(len(trade_alias_frame.index)):
+
+        selected_trades = aggregate_trades[aggregate_trades['order_tag'] == trade_alias_frame['tag'].iloc[i]]
+        combined_list[i] = selected_trades[['ticker','option_type','strike_price','trade_price','trade_quantity','instrument','real_tradeQ']]
+        combined_list[i]['alias'] = trade_alias_frame['alias'].iloc[i]
+
+    aggregate_trades = pd.concat(combined_list).reset_index(drop=True)
+
+    return {'raw_trades': fill_frame, 'aggregate_trades': aggregate_trades}
+
 def get_ticker_from_tt_instrument_name_and_product_name(**kwargs):
 
     instrument_name = kwargs['instrument_name']
@@ -422,6 +479,16 @@ def load_tt_trades(**kwargs):
     trade_frame = assign_trades_2strategies(trade_source='tt',**kwargs)
     con = msu.get_my_sql_connection(**kwargs)
     ts.load_trades_2strategy(trade_frame=trade_frame,con=con,**kwargs)
+
+    if 'con' not in kwargs.keys():
+        con.close()
+
+
+def load_tagged_tt_trades(**kwargs):
+
+    assign_output = get_tagged_tt_fills(**kwargs)
+    con = msu.get_my_sql_connection(**kwargs)
+    ts.load_trades_2strategy(trade_frame=assign_output['aggregate_trades'],con=con,**kwargs)
 
     if 'con' not in kwargs.keys():
         con.close()

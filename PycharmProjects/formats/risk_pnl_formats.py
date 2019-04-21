@@ -51,7 +51,7 @@ def generate_portfolio_pnl_report(**kwargs):
 
     daily_pnl_frame = tpm.get_daily_pnl_snapshot(**kwargs)
 
-    writer = pd.ExcelWriter(ta_output_dir + '/pnl.xlsx', engine='xlsxwriter')
+    writer = pd.ExcelWriter(ta_output_dir + '/pnl_' + kwargs['name'] + '.xlsx', engine='xlsxwriter')
     daily_pnl_frame.to_excel(writer, sheet_name='strategies')
     worksheet_strategies = writer.sheets['strategies']
 

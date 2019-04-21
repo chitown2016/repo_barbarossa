@@ -28,8 +28,6 @@ def process_cme_options_4ticker(**kwargs):
         else:
             data_read_out = rcf.read_cme_settle_txt_files(file_name=file_name, report_date=report_date)
 
-
-
         title_frame = data_read_out['title_frame']
         settle_list = data_read_out['settle_list']
         month_strike_list = data_read_out['month_strike_list']
@@ -121,6 +119,8 @@ def process_cme_options_4ticker(**kwargs):
         settle_frame['settle'] = settle_frame['settle'].astype('float64')
         settle_frame['strike'] = settle_frame['strike']/1000
     elif ticker_head in ['LC', 'LN', 'ES', 'NQ']:
+        settle_frame = settle_frame[~settle_frame['settle'].str.contains('-')]
+        settle_frame.reset_index(inplace=True, drop=True)
         settle_frame['settle'] = settle_frame['settle'].replace('CAB', cmi.option_cabinet_values[ticker_head])
         settle_frame['settle'] = settle_frame['settle'].astype('float64')
     elif ticker_head in ['FC']:

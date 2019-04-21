@@ -56,8 +56,8 @@ except Exception:
     pass
 
 try:
-    rpf.generate_portfolio_pnl_report(as_of_date=report_date, con=con)
-    prep.move_from_dated_folder_2daily_folder(ext='ta', file_name='pnl', folder_date=report_date)
+    rpf.generate_portfolio_pnl_report(as_of_date=report_date, con=con, name='final')
+    prep.move_from_dated_folder_2daily_folder(ext='ta', file_name='pnl_final', folder_date=report_date)
 except Exception:
     pass
 

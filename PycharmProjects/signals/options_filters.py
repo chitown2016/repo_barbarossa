@@ -25,6 +25,7 @@ vcs_filter_dict = {'Ag_long': 21,
                    'Index_short1': 60}
 
 import contract_utilities.contract_meta_info as cmi
+import pandas as pd
 
 
 def get_vcs_filter_values(**kwargs):
@@ -115,6 +116,13 @@ def get_vcs_filters(**kwargs):
                                                                                          filter_type=short_tuples[i][1],
                                                                                          direction='short',
                                                                                          indicator='Q')))
+
+    selection_indx = selection_indx&pd.notnull(data_frame_input['downside'])&\
+                     pd.notnull(data_frame_input['upside'])&\
+                     (data_frame_input['atmVolRatio']<=1.3)&(data_frame_input['atmVolRatio']>=0.7)&\
+                     (((data_frame_input['Q']<=30)&(data_frame_input['fwdVolQ']>=30))|((data_frame_input['Q']>=60)&(data_frame_input['fwdVolQ']<=70)))
+
+
 
     return {'selected_frame': data_frame_input[selection_indx],'selection_indx': selection_indx}
 

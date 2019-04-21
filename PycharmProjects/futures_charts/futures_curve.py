@@ -84,7 +84,7 @@ def get_butterfly_panel_plot(**kwargs):
     x_tick_values.append('X')
 
     plt.figure(figsize=(16, 7))
-    plt.plot(aligned_data['residuals'])
+    plt.plot(range(len(aligned_data.index)),aligned_data['residuals'])
     plt.xticks(x_tick_locations,x_tick_values)
     plt.grid()
     plt.title('Contracts: ' + str(contract_list) + ', weight2: ' + str(bf_signals_output['second_spread_weight_1'].round(2)))

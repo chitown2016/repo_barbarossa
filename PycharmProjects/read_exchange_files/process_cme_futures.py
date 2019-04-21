@@ -37,6 +37,9 @@ def process_cme_futures_4tickerhead(**kwargs):
 
         selected_frame = title_frame[(title_frame['asset_type'] == 'futures') & (title_frame['ticker_head'] == ticker_head)]
 
+        if len(selected_frame.index)==0:
+            return {'settle_frame': settle_frame}
+
         contact_month_strings = month_strike_list[selected_frame.index[0]]
 
         datetime_conversion = [dt.datetime.strptime(x.replace('JLY', 'JUL'), '%b%y') for x in contact_month_strings]

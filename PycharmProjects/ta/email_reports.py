@@ -1,7 +1,7 @@
 
 import shared.email as se
-import contract_utilities.expiration as exp
 import shared.directory_names as dn
+import contract_utilities.expiration as exp
 import shared.calendar_utilities as cu
 import ta.strategy as ts
 import ta.expiration_followup as ef
@@ -39,8 +39,23 @@ def send_hrsn_report(**kwargs):
 
     se.send_email_with_attachment(subject='hrsn_' + str(report_date),
                                   email_text='cov_data_integrity: ' + cov_data_integrity + "\r\n" + expiration_text,
-                                  attachment_list = [daily_dir + '/' + 'pnl_' + str(report_date) + '.xlsx', daily_dir +
+                                  attachment_list = [daily_dir + '/' + 'pnl_final_' + str(report_date) + '.xlsx', daily_dir +
                                                      '/' + 'followup_' + str(report_date) + '.xlsx'])
+
+
+def send_hrsn_early_report(**kwargs):
+
+    if 'report_date' in kwargs.keys():
+        report_date = kwargs['report_date']
+    else:
+        report_date = exp.doubledate_shift_bus_days()
+
+    ta_output_dir = dn.get_dated_directory_extension(folder_date=report_date,ext='ta')
+
+    se.send_email_with_attachment(subject='hrsn_early_' + str(report_date),
+                                  attachment_list = [ta_output_dir + '/' + 'pnl_early.xlsx'])
+
+
 
 
 def send_dual_momentum_report(**kwargs):

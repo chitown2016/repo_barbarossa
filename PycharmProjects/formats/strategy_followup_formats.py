@@ -48,7 +48,7 @@ def generate_futures_butterfly_followup_report(**kwargs):
     butterfly_followup_frame = pd.DataFrame(results)
     butterfly_followup_frame['alias'] = futures_butterfly_frame['alias'].values
 
-    pnl_frame = pm.get_daily_pnl_snapshot(as_of_date=as_of_date, con=con)
+    pnl_frame = pm.get_daily_pnl_snapshot(as_of_date=as_of_date, con=con, name='final')
     risk_output = hr.get_historical_risk_4open_strategies(as_of_date=as_of_date, con=con)
 
     merged_frame1 = pd.merge(butterfly_followup_frame,pnl_frame, how='left', on='alias')
@@ -164,6 +164,7 @@ def generate_vcs_followup_report(**kwargs):
     vcs_followup_frame = pd.DataFrame(results)
     vcs_followup_frame['alias'] = vcs_frame['alias'].values
 
+    kwargs['name'] = 'final'
     pnl_frame = pm.get_daily_pnl_snapshot(**kwargs)
     merged_frame1 = pd.merge(vcs_followup_frame,pnl_frame, how='left', on='alias')
 
@@ -227,6 +228,7 @@ def generate_ocs_followup_report(**kwargs):
     ocs_followup_frame = pd.DataFrame(results)
     ocs_followup_frame['alias'] = ocs_frame['alias'].values
 
+    kwargs['name'] = 'final'
     pnl_frame = pm.get_daily_pnl_snapshot(**kwargs)
     merged_frame1 = pd.merge(ocs_followup_frame,pnl_frame, how='left', on='alias')
     ocs_followup_frame = merged_frame1[['alias','dollar_noise','time_held','daily_pnl','total_pnl','notes']]

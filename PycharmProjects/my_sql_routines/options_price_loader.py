@@ -18,6 +18,7 @@ import shared.directory_names as dn
 def update_options_price_database_from_cme_files_4ticker(**kwargs):
 
     ticker = kwargs['ticker']
+    print(ticker)
     contract_specs_output = cmi.get_contract_specs(ticker)
     ticker_head = contract_specs_output['ticker_head']
     ticker_month_num = contract_specs_output['ticker_month_num']
