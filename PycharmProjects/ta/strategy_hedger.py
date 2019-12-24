@@ -102,6 +102,7 @@ def get_hedge_4strategy(**kwargs):
             net_position['total_delta'] = net_position['option_delta']
         else:
             net_position = pd.merge(net_position, futures_frame_w_options, how='outer', on='underlying_ticker')
+            net_position[['underlying_delta']] = net_position[['underlying_delta']].fillna(value=0,inplace=False)
             net_position['total_delta'] = net_position['option_delta']+net_position['underlying_delta']
 
         if not futures_frame_wo_options.empty:
@@ -182,7 +183,7 @@ def get_delta_strategy_alias(**kwargs):
     strategy_frame = tas.get_open_strategies(**kwargs)
     strategy_frame.sort_values('open_date', ascending=True, inplace=True)
 
-    strategy_class_list = [sc.convert_from_string_to_dictionary(string_input=strategy_frame['description_string'][x])['strategy_class'] for x in range(len(strategy_frame.index))]
+    strategy_class_list = [sc.convert_from_string_to_dictionary(string_input=strategy_frame['description_string'].iloc[x])['strategy_class'] for x in range(len(strategy_frame.index))]
 
     if ('delta' not in strategy_class_list):
         datetime_now = dt.datetime.now()

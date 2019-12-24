@@ -2,6 +2,7 @@
 import get_price.get_futures_price as gfp
 import contract_utilities.contract_meta_info as cmi
 import opportunity_constructs.utilities as opUtil
+import machine_learning.calculate_outcomes as co
 import signals.technical_indicators as ti
 import shared.calendar_utilities as cu
 import shared.statistics as stats
@@ -34,8 +35,13 @@ def get_fm_signals(**kwargs):
 
     if len(data4day.index)<2:
         return {'ticker': '', 'comm_net': np.nan, 'spec_net': np.nan,
-            'comm_cot_index_slow': np.nan, 'comm_cot_index_fast': np.nan, 'trend_direction': np.nan,'curve_slope': np.nan,
-            'rsi_3': np.nan, 'rsi_7': np.nan, 'rsi_14': np.nan,
+            'comm_cot_index_slow': np.nan, 'comm_cot_index_fast': np.nan,
+            'comm_net_d': np.nan, 'spec_net_d': np.nan,
+            'trend_direction': np.nan,'curve_slope': np.nan,
+            'rsi_3': np.nan, 'rsi_7': np.nan, 'rsi_14': np.nan,'rsi_14_d': np.nan,
+            'macd_histogram_q': np.nan,
+            'macd_histogram_d': np.nan,
+            'bollinger_dev': np.nan,
             'change1': np.nan,
             'change1_instant': np.nan,
             'change5': np.nan,
@@ -45,7 +51,11 @@ def get_fm_signals(**kwargs):
             'change1_instant_dollar': np.nan,
             'change5_dollar': np.nan,
             'change10_dollar': np.nan,
-            'change20_dollar': np.nan}
+            'change20_dollar': np.nan,
+            'long_outcome1': np.nan,
+            'short_outcome1': np.nan,
+            'long_outcome2': np.nan,
+            'short_outcome2': np.nan}
 
     data4day.sort_values('volume', ascending=False, inplace=True)
     data4day = data4day.iloc[:2]
@@ -117,11 +127,24 @@ def get_fm_signals(**kwargs):
     else:
         trend_direction = -1
 
-    ticker_data = gfp.get_futures_price_preloaded(ticker=ticker2,settle_date_to=datetime_to)
+    ticker_data = gfp.get_futures_price_preloaded(ticker=ticker2)
+    ticker_data.rename(columns={'close_price': 'close', 'high_price': 'high', 'low_price': 'low', 'open_price': 'open'},inplace=True)
+    ticker_data.reset_index(drop=True, inplace=True)
 
+    ticker_data = ti.get_atr(data_frame_input=ticker_data, period=14)
+    forward_data = ticker_data[ticker_data['settle_date']>=datetime_to]
+
+    forward_data = co.calculate_volatility_based_outcomes(data_frame_input=forward_data[:21], volatility_field='atr_14', calculate_first_row_onlyQ=True)
+
+    ticker_data = ticker_data[ticker_data['settle_date']<=datetime_to]
     ticker_data = ti.rsi(data_frame_input=ticker_data, change_field='change_1', period=3)
     ticker_data = ti.rsi(data_frame_input=ticker_data, change_field='change_1', period=7)
     ticker_data = ti.rsi(data_frame_input=ticker_data, change_field='change_1', period=14)
+
+    ticker_data = ti.get_macd(data_frame_input=ticker_data, period1=12, period2=26, period3=9)
+    macd_histogram_q = stats.get_quantile_from_number({'x': ticker_data['macd_hist_12_26_9'].iloc[-1], 'y': ticker_data['macd_hist_12_26_9']})
+
+    ticker_data = ti.get_bollinger_deviation(data_frame_input=ticker_data,period=20)
 
     cot_output = cot.get_cot_data(ticker_head=ticker_head, date_to=date_to)
 
@@ -154,6 +177,9 @@ def get_fm_signals(**kwargs):
             comm_net = cot_output['comm_net'].iloc[-1]
             spec_net = cot_output['spec_net'].iloc[-1]
 
+        comm_net_d = np.sign(comm_net-cot_output['comm_net'].iloc[-3])
+        spec_net_d = np.sign(spec_net-cot_output['spec_net'].iloc[-3])
+
         comm_net_min_slow = cot_output['comm_net'].iloc[-156:].min()
         comm_net_max_slow = cot_output['comm_net'].iloc[-156:].max()
 
@@ -169,12 +195,21 @@ def get_fm_signals(**kwargs):
         spec_net = np.nan
         comm_cot_index_slow = np.nan
         comm_cot_index_fast = np.nan
+        comm_net_d = np.nan
+        spec_net_d = np.nan
 
     contract_multiplier = cmi.contract_multiplier[ticker_head]
+    print(ticker_head)
 
     return {'ticker': ticker2, 'comm_net': comm_net, 'spec_net': spec_net,
+            'comm_net_d': comm_net_d,
+            'spec_net_d': spec_net_d,
             'comm_cot_index_slow': comm_cot_index_slow, 'comm_cot_index_fast': comm_cot_index_fast, 'trend_direction': trend_direction,'curve_slope': curve_slope,
             'rsi_3': ticker_data['rsi_3'].iloc[-1], 'rsi_7': ticker_data['rsi_7'].iloc[-1], 'rsi_14': ticker_data['rsi_14'].iloc[-1],
+            'rsi_14_d': np.sign(ticker_data['rsi_14'].iloc[-1]-ticker_data['rsi_14'].iloc[-3]),
+            'macd_histogram_q':macd_histogram_q,
+            'macd_histogram_d': np.sign(ticker_data['macd_hist_12_26_9'].iloc[-1]-ticker_data['macd_hist_12_26_9'].iloc[-3]),
+            'bollinger_dev': ticker_data['bollinger_dev_20'].iloc[-1],
             'change1': ticker_data['change1'].iloc[-1]/daily_noise,
             'change1_instant': ticker_data['change1_instant'].iloc[-1]/daily_noise,
             'change5': ticker_data['change5'].iloc[-1]/daily_noise,
@@ -184,7 +219,11 @@ def get_fm_signals(**kwargs):
             'change1_instant_dollar': ticker_data['change1_instant'].iloc[-1]*contract_multiplier,
             'change5_dollar': ticker_data['change5'].iloc[-1]*contract_multiplier,
             'change10_dollar': ticker_data['change10'].iloc[-1]*contract_multiplier,
-            'change20_dollar': ticker_data['change20'].iloc[-1]*contract_multiplier}
+            'change20_dollar': ticker_data['change20'].iloc[-1]*contract_multiplier,
+            'long_outcome1': forward_data['long_outcome1'].iloc[0],
+            'short_outcome1': forward_data['short_outcome1'].iloc[0],
+            'long_outcome2': forward_data['long_outcome2'].iloc[0],
+            'short_outcome2': forward_data['short_outcome2'].iloc[0]}
 
 def get_cot_strategy_signals(**kwargs):
 

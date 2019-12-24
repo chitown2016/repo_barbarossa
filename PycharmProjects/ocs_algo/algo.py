@@ -56,6 +56,7 @@ class Algo(subs.subscription):
     # increase size by %15 (165->190) on November 1st 2018
     # increase size by %15 (190->220) on January 2nd 2019
     # increase size by %100 (220->440) on February 19th 2019
+    # increase size by %25 (440->550) on May 24th 2019
     total_traded_volume_max_before_user_confirmation = 250
     total_traded_volume_since_last_confirmation = 0
     total_volume_traded = 0

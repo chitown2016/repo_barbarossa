@@ -163,7 +163,7 @@ def main():
     app.log = lg.get_logger(file_identifier='ib_ocs',log_level='INFO')
 
     app.con = con
-    app.pnl_frame = tpm.get_daily_pnl_snapshot(as_of_date=report_date)
+    app.pnl_frame = tpm.get_daily_pnl_snapshot(as_of_date=report_date,name='final')
     print('Emre')
 
     app.connect(client_id=2)

@@ -25,6 +25,8 @@ import formats.futures_strategy_formats as fsf
 import formats.intraday_futures_strategy_formats as ifsf
 import contract_utilities.expiration as exp
 import ta.prepare_daily as prep
+import datetime as dt
+import fundamental_data.cot_data as cot
 import get_price.save_stock_data as ssd
 
 commodity_address = 'ftp://ftp.cmegroup.com/pub/settle/stlags'
@@ -128,5 +130,11 @@ try:
     ssd.get_symbol_frame(frame_type='nasdaq', settle_date=folder_date)
 except Exception:
     log.error('save stock list failed', exc_info=True)
+
+try:
+    if dt.datetime.today().weekday() == 5:
+        cot.presave_cot_data()
+except Exception:
+    pass
 
 con.close()

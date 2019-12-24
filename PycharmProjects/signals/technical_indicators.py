@@ -99,9 +99,11 @@ def get_atr(**kwargs):
 
         if i == 0:
             data_frame_input['atr_' + str(period)].iloc[-smoothing_lookback + i] = np.mean(data_frame_input['TR'].iloc[(-smoothing_lookback-period+1):(-smoothing_lookback + 1 + i)])
-        else:
+        elif ~np.isnan(data_frame_input['TR'].iloc[-smoothing_lookback + i]):
             data_frame_input['atr_' + str(period)].iloc[-smoothing_lookback + i] = ((period-1) * data_frame_input['atr_' + str(period)].iloc[-smoothing_lookback-1 + i] +
                                                       data_frame_input['TR'].iloc[-smoothing_lookback + i]) / period
+        else:
+            data_frame_input['atr_' + str(period)].iloc[-smoothing_lookback + i] = data_frame_input['atr_' + str(period)].iloc[-smoothing_lookback-1 + i]
 
     return data_frame_input.drop(['close_1', 'TR1', 'TR2', 'TR3', 'TR'], 1, inplace=False)
 
@@ -289,6 +291,17 @@ def get_williams_r(**kwargs):
         data_frame_input['max'] - data_frame_input['min'])
 
     return data_frame_input.drop(['min', 'max'], 1, inplace=False)
+
+
+def get_bollinger_deviation(**kwargs):
+
+    data_frame_input = kwargs['data_frame_input']
+    period = kwargs['period']
+
+    data_frame_input['bollinger_dev_' + str(period)] = (data_frame_input['close'] - data_frame_input['close'].rolling(window=period, center=False).mean()) / \
+                                                       data_frame_input['close'].rolling(window=period,center=False).std()
+
+    return data_frame_input
 
 
 

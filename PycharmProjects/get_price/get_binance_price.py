@@ -3,8 +3,11 @@ __author__ = 'kocat_000'
 import dateparser
 import pytz
 import pandas as pd
-from datetime import datetime as dt
+import datetime as dt
 import binance_trading.utils as btu
+import shared.calendar_utilities as cu
+import shared.directory_names as dn
+import os.path
 import time
 
 
@@ -16,7 +19,7 @@ def date_to_milliseconds(date_str):
     :type date_str: str
     """
     # get epoch value in UTC
-    epoch = dt.utcfromtimestamp(0).replace(tzinfo=pytz.utc)
+    epoch = dt.datetime.utcfromtimestamp(0).replace(tzinfo=pytz.utc)
     # parse our date string
     d = dateparser.parse(date_str)
     # if the date is not timezone aware apply UTC timezone
@@ -147,6 +150,60 @@ def get_klines(**kwargs):
     candle_frame['close'] = candle_frame['close'].astype('float')
     candle_frame['volume'] = candle_frame['volume'].astype('float')
 
-    candle_frame['openDatetime'] = [dt.fromtimestamp(x/1000,tz=pytz.UTC) for x in candle_frame['openTime']]
+    candle_frame['openDatetime'] = [dt.datetime.fromtimestamp(x/1000,tz=pytz.UTC) for x in candle_frame['openTime']]
     candle_frame['openDate'] = [x.date() for x in candle_frame['openDatetime']]
     return candle_frame.drop(['ignore'], axis=1, inplace=False)
+
+def get_binance_price_preloaded(**kwargs):
+
+    interval = kwargs['interval']
+    ticker = kwargs['ticker']
+    date_from = kwargs['date_from']
+    date_to = kwargs['date_to']
+
+    file_name = ticker + '_1h.pkl'
+
+    datetime_from = cu.convert_doubledate_2datetime(date_from)
+    datetime_to = cu.convert_doubledate_2datetime(date_to)
+
+    x = datetime_from
+
+    price_frame_list = []
+
+    while x <= datetime_to:
+
+        folder_name = dn.get_dated_directory_extension(folder_date=int(x.strftime('%Y%m%d')), ext='binance')
+        dated_file_name = folder_name + '/' + file_name
+        if os.path.isfile(dated_file_name):
+            price_frame_list.append(pd.read_pickle(dated_file_name))
+
+        x = x + dt.timedelta(days=1)
+
+    merged_data = pd.concat(price_frame_list)
+    merged_data.set_index('openDatetime', drop=True, inplace=True)
+
+    if interval.upper()!='1H':
+        data_out = pd.DataFrame()
+        data_out['open'] = merged_data['open'].resample('4H').first()
+        data_out['close'] = merged_data['close'].resample('4H').last()
+        data_out['high'] = merged_data['high'].resample('4H').max()
+        data_out['low'] = merged_data['low'].resample('4H').min()
+    else:
+        data_out = merged_data
+
+    return data_out
+
+
+def get_binance_daily_price_preloaded(**kwargs):
+
+    ticker = kwargs['ticker']
+    date_from = kwargs['date_from']
+    date_to = kwargs['date_to']
+
+
+
+
+
+
+
+

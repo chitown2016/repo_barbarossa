@@ -37,7 +37,7 @@ ib_option_trading_class_dictionary = {'AD': 'ADU','CD': 'CAU', 'EC': 'EUU', 'BP'
                                     'CL': 'LO', 'NG': 'ON', 'GC': 'OG', 'SI': 'SO', 'ES': 'ES',
                                     'TU': 'OZT', 'FV': 'OZF', 'TY': 'OZN', 'US': 'OZB'}
 
-ib_strike_multiplier_dictionary = {'JY': 0.0000001, 'LN': 0.01, 'LC': 0.01, 'W': 0.01}
+ib_strike_multiplier_dictionary = {'JY': 0.0000001, 'LN': 0.01, 'LC': 0.01, 'W': 0.01, 'S': 0.01}
 
 ib_multiplier_dictionary = {'BO': '60000','SM': '100', 'C': '5000', 'S': '5000','W': '5000', 'LC': '40000', 'LN': '40000', 'TY': '1000', 'HO': '42000', 'ES': '50'}
 
@@ -117,10 +117,16 @@ def get_db_ticker_from_ib_contract(**kwargs):
 
     if len(local_symbol_out) in [1,2]:
         contract_month_str = local_symbol_out[0][-2]
-        contract_year_str = str(m.floor(date_now / 100000)) + local_symbol_out[0][-1]
+
+        if local_symbol_out[0][-1]=='0':
+            contract_year_str = str(m.ceil(date_now / 10000))
+        else:
+            contract_year_str = str(m.floor(date_now / 100000)) + local_symbol_out[0][-1]
     else:
         contract_month_str = cmi.full_letter_month_list[cu.three_letter_month_dictionary[local_symbol_out[3]]-1]
         contract_year_str = str(m.floor(date_now / 1000000)) + local_symbol_out[4]
+
+    #contract_year_str = '2020'
 
     contract_output['ticker'] = ticker_head + contract_month_str + contract_year_str
 
