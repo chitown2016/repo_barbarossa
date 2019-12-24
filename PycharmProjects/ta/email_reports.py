@@ -1,6 +1,7 @@
 
 import shared.email as se
 import shared.directory_names as dn
+import shared.directory_names_aux as dna
 import contract_utilities.expiration as exp
 import shared.calendar_utilities as cu
 import ta.strategy as ts
@@ -10,7 +11,7 @@ import signals.dual_momentum as dm
 
 def send_hrsn_report(**kwargs):
 
-    daily_dir = dn.get_directory_name(ext='daily')
+    daily_dir = dna.get_directory_name(ext='daily')
 
     if 'report_date' in kwargs.keys():
         report_date = kwargs['report_date']

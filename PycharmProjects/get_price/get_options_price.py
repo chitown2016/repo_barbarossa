@@ -5,6 +5,7 @@ with warnings.catch_warnings():
     warnings.filterwarnings("ignore",category=FutureWarning)
     import h5py
 
+import shared.directory_names_aux as dna
 import shared.directory_names as dn
 import my_sql_routines.my_sql_utilities as msu
 import scipy.io
@@ -49,7 +50,7 @@ def load_aligend_options_data_file(**kwargs):
     ticker_head = kwargs['ticker_head']
     tr_dte_center = kwargs['tr_dte_center']
 
-    option_data_dir = dn.get_directory_name(ext='aligned_time_series_output')
+    option_data_dir = dna.get_directory_name(ext='aligned_time_series_output')
 
     if 'delta_center' in kwargs.keys():
         delta_center = kwargs['delta_center']
@@ -165,7 +166,7 @@ def get_options_price_from_db(**kwargs):
     else:
         data_frame_out = pd.DataFrame(data, columns=column_names)
 
-    for x in ['close_price', 'delta', 'imp_vol', 'strike', 'theta', 'vega']:
+    for x in ['close_price', 'delta', 'imp_vol', 'strike', 'theta', 'vega', 'option_pnl5', 'delta_pnl5']:
 
         if x in column_names:
             data_frame_out[x] = data_frame_out[x].astype('float64')

@@ -1,13 +1,13 @@
 
 import quandl_data.get_data_quandl as gdq
-import shared.directory_names as dn
+import shared.directory_names_aux as dna
 import contract_utilities.contract_meta_info as cmi
 import shared.calendar_utilities as cu
 import datetime as dt
 import os.path
 import pandas as pd
 
-presaved_cot_data_folder = dn.get_directory_name(ext='commitments_of_traders_data')
+presaved_cot_data_folder = dna.get_directory_name(ext='commitments_of_traders_data')
 
 db_2_quandl_dictionary = {'GC': '088691',
                           'SI': '084691',

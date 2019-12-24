@@ -100,6 +100,11 @@ def process_cme_options_4ticker(**kwargs):
         settle_frame['interest'] = selected_frame['PRIOR INT']
         settle_frame.reset_index(inplace=True, drop=True)
 
+    settle_frame = settle_frame[~settle_frame['settle'].str.contains('-')]
+
+    if settle_frame.empty:
+            return {'success': False, 'settle_frame': pd.DataFrame()}
+
     settle_frame['strike'] = settle_frame['strike'].astype('float64')
 
     if ticker_head in ['C', 'S', 'W', 'KW']:
@@ -119,7 +124,6 @@ def process_cme_options_4ticker(**kwargs):
         settle_frame['settle'] = settle_frame['settle'].astype('float64')
         settle_frame['strike'] = settle_frame['strike']/1000
     elif ticker_head in ['LC', 'LN', 'ES', 'NQ']:
-        settle_frame = settle_frame[~settle_frame['settle'].str.contains('-')]
         settle_frame.reset_index(inplace=True, drop=True)
         settle_frame['settle'] = settle_frame['settle'].replace('CAB', cmi.option_cabinet_values[ticker_head])
         settle_frame['settle'] = settle_frame['settle'].astype('float64')
@@ -134,7 +138,7 @@ def process_cme_options_4ticker(**kwargs):
     elif ticker_head in ['EC']:
         settle_frame['settle'] = settle_frame['settle'].replace('CAB', cmi.option_cabinet_values[ticker_head])
         settle_frame['settle'] = settle_frame['settle'].astype('float64')
-        settle_frame['strike'] = settle_frame['strike']/1000
+        settle_frame['strike'] = settle_frame['strike']/10000
     elif ticker_head in ['JY']:
         settle_frame['settle'] = settle_frame['settle'].replace('CAB', cmi.option_cabinet_values[ticker_head]/1000)
         settle_frame['settle'] = settle_frame['settle'].astype('float64')*1000

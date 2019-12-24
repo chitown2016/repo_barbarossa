@@ -7,13 +7,13 @@ import my_sql_routines.my_sql_utilities as msu
 import contract_utilities.expiration as exp
 from pandas.tseries.offsets import CustomBusinessDay
 import shared.calendar_utilities as cu
-import shared.directory_names as dn
+import shared.directory_names_aux as dna
 import pandas as pd
 import numpy as np
 import datetime as dt
 pd.options.mode.chained_assignment = None
 
-presaved_futures_data_folder = dn.get_directory_name(ext='presaved_futures_data')
+presaved_futures_data_folder = dna.get_directory_name(ext='presaved_futures_data')
 
 dirty_data_points = pd.DataFrame([('BM2006', dt.datetime(2005, 11, 18), True),
                                   ('BM2006', dt.datetime(2005, 11, 21), True),

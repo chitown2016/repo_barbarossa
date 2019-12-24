@@ -2,10 +2,11 @@
 import contract_utilities.expiration as exp
 import ta.strategy as ts
 import shutil as sutil
+import shared.directory_names_aux as dna
 import shared.directory_names as dn
 import formats.utils as futil
 
-daily_dir = dn.get_directory_name(ext='daily')
+daily_dir = dna.get_directory_name(ext='daily')
 
 
 def prepare_strategy_daily(**kwargs):

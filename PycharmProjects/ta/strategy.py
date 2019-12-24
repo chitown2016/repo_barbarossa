@@ -1,6 +1,6 @@
 __author__ = 'kocat_000'
 
-import shared.directory_names as dn
+import shared.directory_names_aux as dna
 import shared.calendar_utilities as cu
 import os.path
 import pandas as pd
@@ -340,7 +340,7 @@ def select_strategies(**kwargs):
     if 'open_date_from' in kwargs.keys():
         open_date_from = kwargs['open_date_from']
     else:
-        open_date_from = 20171001
+        open_date_from = 20180601
 
     sql_query = sql_query + ' open_date>=' + str(open_date_from)
 
@@ -375,7 +375,7 @@ def create_strategy_output_dir(**kwargs):
     strategy_class = kwargs['strategy_class']
     report_date = kwargs['report_date']
 
-    strategy_output_folder = dn.get_directory_name(ext='strategy_output')
+    strategy_output_folder = dna.get_directory_name(ext='strategy_output')
 
     if strategy_class == 'futures_butterfly':
         output_dir = strategy_output_folder + '/futures_butterfly/' + cu.get_directory_extension(report_date)

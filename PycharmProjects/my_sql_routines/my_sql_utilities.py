@@ -1,6 +1,8 @@
 __author__ = 'kocat_000'
 import mysql.connector
 from math import ceil
+import shared.directory_names_aux as dna
+import os as os
 
 
 def get_my_sql_connection(**kwargs):
@@ -36,3 +38,21 @@ def sql_execute_many_wrapper(**kwargs):
     if 'con' not in kwargs.keys():
         con.close()
 
+
+def dropbox_backup(**kwargs):
+
+    box_no = kwargs['box_no']
+
+    backup_path = dna.get_directory_name(ext='drop_box_trading') + "/mysql/backups"
+    backup_path = backup_path.replace("\\","/")
+
+    db_host = 'localhost'
+    db_user = 'ekocatulum'
+    db_pass = 'caesar1789'
+    db_name = 'futures_master'
+
+    dumpcmd = "mysqldump -h " + db_host + " -u " + db_user + " -p" + db_pass + " " + db_name + " trades > " + backup_path + "/trades" + str(box_no) + ".sql"
+    os.system(dumpcmd)
+
+    dumpcmd = "mysqldump -h " + db_host + " -u " + db_user + " -p" + db_pass + " " + db_name + " strategy > " + backup_path + "/strategy" + str(box_no) + ".sql"
+    os.system(dumpcmd)

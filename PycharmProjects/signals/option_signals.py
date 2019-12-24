@@ -19,6 +19,8 @@ warnings.filterwarnings("ignore", message="invalid value encountered in sign")
 
 def get_vcs_signals(**kwargs):
 
+    print(kwargs['ticker_list'])
+
     aligned_indicators_output = get_aligned_option_indicators(**kwargs)
 
     if not aligned_indicators_output['success']:
@@ -466,7 +468,8 @@ def get_aligned_option_indicators(**kwargs):
         ticker_data = ticker_data[tr_dte_selection]
 
         ticker_data['old_aligned'] = False
-        ticker_data['profit5'] = np.NaN
+        ticker_data['profit5'] = (ticker_data['option_pnl5']-ticker_data['delta_pnl5']).astype(float)*cmi.contract_multiplier[ticker_head_list[x]]
+        #ticker_data['profit5'] = np.nan
         ticker_data = pd.concat([aligned_data, ticker_data[['settle_date', 'ticker_month', 'ticker_year', 'cal_dte', 'tr_dte', 'imp_vol', 'close2close_vol20', 'profit5', 'old_aligned']]])
 
         ticker_data = ticker_data[(ticker_data['settle_date'] <= settle_datetime)&(ticker_data['settle_date'] >= settle_datetime_from)]
@@ -501,7 +504,7 @@ def calc_delta_vol_4ticker(**kwargs):
     del kwargs['delta_target']
     delta_max_deviation = 0.15
 
-    skew_output = gop.get_options_price_from_db(column_names=['delta', 'imp_vol', 'strike', 'theta', 'cal_dte', 'tr_dte'], **kwargs)
+    skew_output = gop.get_options_price_from_db(column_names=['delta', 'imp_vol', 'strike', 'theta', 'cal_dte', 'tr_dte', 'option_pnl5', 'delta_pnl5'], **kwargs)
 
     if skew_output.empty:
         tr_dte = np.NaN
@@ -510,7 +513,7 @@ def calc_delta_vol_4ticker(**kwargs):
         tr_dte = skew_output['tr_dte'][0]
         cal_dte = skew_output['cal_dte'][0]
 
-    output_dict = {'delta_vol': np.NaN, 'strike': np.NaN, 'theta': np.NaN, 'cal_dte': cal_dte, 'tr_dte': tr_dte}
+    output_dict = {'delta_vol': np.NaN, 'strike': np.NaN, 'theta': np.NaN, 'cal_dte': cal_dte, 'tr_dte': tr_dte, 'option_pnl5': np.nan, 'delta_pnl5': np.nan}
 
     skew_output = skew_output[(skew_output['imp_vol'].notnull())]
 
@@ -531,6 +534,8 @@ def calc_delta_vol_4ticker(**kwargs):
     output_dict['delta_vol'] = skew_output_select['imp_vol'].iloc[0]
     output_dict['strike'] = skew_output_select['strike'].iloc[0]
     output_dict['theta'] = skew_output_select['theta'].iloc[0]
+    output_dict['option_pnl5'] = skew_output_select['option_pnl5'].iloc[0]
+    output_dict['delta_pnl5'] = skew_output_select['delta_pnl5'].iloc[0]
 
     return output_dict
 
@@ -631,7 +636,8 @@ def get_option_ticker_indicators(**kwargs):
     if 'column_names' in kwargs.keys():
         column_names = kwargs['column_names']
     else:
-        column_names = ['ticker', 'price_date' , 'ticker_head', 'ticker_month', 'ticker_year', 'cal_dte', 'tr_dte', 'imp_vol', 'theta','close2close_vol20', 'volume','open_interest']
+        column_names = ['ticker', 'price_date' , 'ticker_head', 'ticker_month', 'ticker_year', 'cal_dte', 'tr_dte', 'imp_vol', 'theta','close2close_vol20',
+                        'option_pnl5', 'delta_pnl5','volume','open_interest']
 
     sql_query = 'SELECT ' + ",".join(column_names) + ' FROM option_ticker_indicators ' + filter_string
 

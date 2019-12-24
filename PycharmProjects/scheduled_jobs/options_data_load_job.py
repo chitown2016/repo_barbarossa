@@ -25,6 +25,7 @@ import formats.futures_strategy_formats as fsf
 import formats.risk_pnl_formats as rpf
 import ta.email_reports as er
 import ta.prepare_daily as prep
+import my_sql_routines.options_pnl_loader as opnl
 
 commodity_address = 'ftp://ftp.cmegroup.com/pub/settle/stlags'
 equity_address = 'ftp://ftp.cmegroup.com/pub/settle/stleqt'
@@ -132,6 +133,20 @@ try:
     fsf.generate_ifs_formatted_output(report_date=folder_date)
 except Exception:
     log.error('generate_ifs failed', exc_info=True)
+    pass
+
+try:
+    log.info('backup trades database')
+    msu.dropbox_backup(box_no=1)
+except Exception:
+    log.error('backup trades failed', exc_info=True)
+    pass
+
+try:
+    log.info('update options pnls')
+    opnl.update_options_pnls_4date(con=con, settle_date=folder_date)
+except Exception:
+    log.error('update options pnls failed', exc_info=True)
     pass
 
 try:

@@ -1,4 +1,5 @@
 
+import shared.directory_names_aux as dna
 import shared.directory_names as dn
 import shared.utils as su
 import shared.calendar_utilities as cu
@@ -147,17 +148,17 @@ def convert_from_cme_contract_code(contract_code):
 
 def load_latest_tt_fills(**kwargs):
 
-    file_list = os.listdir(dn.tt_fill_directory)
+    file_list = os.listdir(dna.tt_fill_directory)
     num_files = len(file_list)
 
     time_list = []
 
     for i in range(num_files):
-        time_list.append(os.path.getmtime(dn.tt_fill_directory + '/' + file_list[i]))
+        time_list.append(os.path.getmtime(dna.tt_fill_directory + '/' + file_list[i]))
 
     loc_latest_file = time_list.index(max(time_list))
 
-    tt_export_frame = pd.read_csv(dn.tt_fill_directory + '/' + file_list[loc_latest_file])
+    tt_export_frame = pd.read_csv(dna.tt_fill_directory + '/' + file_list[loc_latest_file])
 
     tt_export_frame_filtered = tt_export_frame[tt_export_frame['Product Type']=='Future']
 
@@ -171,7 +172,7 @@ def load_latest_tt_fills(**kwargs):
 
 def load_cme__fills(**kwargs):
 
-    fill_frame = pd.read_csv(dn.get_directory_name(ext='daily') + '/' + cme_direct_fill_file_name, header=1)
+    fill_frame = pd.read_csv(dna.get_directory_name(ext='daily') + '/' + cme_direct_fill_file_name, header=1)
 
     fill_frame_filtered = fill_frame[fill_frame['IsStrategy'] == False]
     fill_frame_filtered.reset_index(inplace=True,drop=True)
@@ -211,7 +212,8 @@ def get_formatted_tt_fills(**kwargs):
     aggregate_trades['trade_price'] = grouped['PQ'].sum()/grouped['Qty'].sum()
     aggregate_trades['trade_quantity'] = grouped['Qty'].sum()
 
-    aggregate_trades.loc[(slice(None),'S'),'trade_quantity']=-aggregate_trades.loc[(slice(None),'S'),'trade_quantity']
+    if 'S' in aggregate_trades.index.levels[1]:
+        aggregate_trades.loc[(slice(None),'S'),'trade_quantity']=-aggregate_trades.loc[(slice(None),'S'),'trade_quantity']
     aggregate_trades['ticker'] = grouped['ticker'].first()
     aggregate_trades['ticker_head'] = grouped['ticker_head'].first()
     aggregate_trades['instrument'] = [product_type_instrument_conversion[x] for x in grouped['Product Type'].first()]
@@ -395,7 +397,7 @@ def get_formatted_cme_direct_fills(**kwargs):
 
 def get_formatted_manual_entry_fills(**kwargs):
 
-    fill_frame = pd.read_csv(dn.get_directory_name(ext='daily') + '/' + manual_trade_entry_file_name)
+    fill_frame = pd.read_csv(dna.get_directory_name(ext='daily') + '/' + manual_trade_entry_file_name)
     formatted_frame = fill_frame
     formatted_frame.rename(columns={'optionType': 'option_type',
                                     'strikePrice': 'strike_price',
@@ -455,7 +457,7 @@ def assign_trades_2strategies(**kwargs):
 
     aggregate_trades = formatted_fills['aggregate_trades']
 
-    allocation_frame = pd.read_excel(dn.get_directory_name(ext='daily') + '/' + 'trade_allocation.xlsx')
+    allocation_frame = pd.read_excel(dna.get_directory_name(ext='daily') + '/' + 'trade_allocation.xlsx')
     combined_list = [None]*len(allocation_frame.index)
 
     for i in range(len(allocation_frame.index)):

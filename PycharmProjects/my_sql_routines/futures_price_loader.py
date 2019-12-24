@@ -189,16 +189,14 @@ def update_futures_price_database_from_cme_file(**kwargs):
     now = datetime.datetime.now()
     run_datetime = cu.convert_doubledate_2datetime(run_date)
 
-    print(ticker_head_list)
-
     for ticker_head in ticker_head_list:
-        print(ticker_head)
+        #print(ticker_head)
 
         contract_list = []
 
         bday_us = CustomBusinessDay(calendar=exp.get_calendar_4ticker_head(ticker_head))
 
-        if not exp.is_business_day(double_date=run_date, reference_tickerhead=ticker_head):
+        if not exp.is_business_day(double_date=run_date):
             continue
 
         cme_output = pcf.process_cme_futures_4tickerhead(ticker_head=ticker_head, report_date=run_date)

@@ -5,7 +5,7 @@ sys.path.append(r'C:\Users\kocat_000\quantFinance\PycharmProjects')
 import contract_utilities.expiration as exp
 import opportunity_constructs.utilities as opUtil
 import contract_utilities.contract_meta_info as cmi
-import shared.directory_names as dn
+import shared.directory_names_aux as dna
 import get_price.get_futures_price as gfp
 import shared.statistics as stats
 import shared.calendar_utilities as cu
@@ -480,7 +480,7 @@ def get_pca_seasonality_adjustments(**kwargs):
 
     date5_years_ago = cu.doubledate_shift(date_to, 5*365)
 
-    backtest_output_dir = dn.get_directory_name(ext='backtest_results')
+    backtest_output_dir = dna.get_directory_name(ext='backtest_results')
 
     file_name = ticker_head + '_' + str(file_date_to) + '_' + str(years_back) + '_z'
 

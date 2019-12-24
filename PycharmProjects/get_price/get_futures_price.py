@@ -4,7 +4,7 @@ import sys
 sys.path.append(r'C:\Users\kocat_000\quantFinance\PycharmProjects')
 import my_sql_routines.my_sql_utilities as msu
 import contract_utilities.contract_meta_info as cmi
-import shared.directory_names as dn
+import shared.directory_names_aux as dna
 import pandas as pd
 import datetime as dt
 import shared.calendar_utilities as cu
@@ -115,7 +115,7 @@ def get_futures_price_preloaded(**kwargs):
     if 'futures_data_dictionary' in kwargs.keys():
         data_out = kwargs['futures_data_dictionary'][ticker_head]
     else:
-        presaved_futures_data_folder = dn.get_directory_name(ext='presaved_futures_data')
+        presaved_futures_data_folder = dna.get_directory_name(ext='presaved_futures_data')
         file_ticker_head = cmi.mini_contract_dictionary.get(ticker_head, ticker_head)
         if os.path.isfile(presaved_futures_data_folder + '/' + file_ticker_head + '.pkl'):
             data_out = pd.read_pickle(presaved_futures_data_folder + '/' + file_ticker_head + '.pkl')

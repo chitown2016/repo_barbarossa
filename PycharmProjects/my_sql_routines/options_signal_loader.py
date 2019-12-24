@@ -80,10 +80,72 @@ def load_ticker_signals_4settle_date(**kwargs):
                      settle_datetime.date(), now, now]) for x in atm_vol_frame.values]
 
     column_str = "ticker, ticker_head, ticker_month, ticker_year, " \
-                 " cal_dte, tr_dte, imp_vol, delta, theta, strike, close2close_vol20, open_interest, volume, price_date, created_date, last_updated_date"
+                 " cal_dte, tr_dte, imp_vol, delta, theta, strike, " \
+                 "close2close_vol20, open_interest, volume, price_date, created_date, last_updated_date"
 
     insert_str = ("%s, " * len(column_str.split(',')))[:-2]
     final_str = "REPLACE INTO option_ticker_indicators (%s) VALUES (%s)" % (column_str, insert_str)
+
+    msu.sql_execute_many_wrapper(final_str=final_str, tuples=tuples, con=con)
+
+    load_pnls_4settle_date(**kwargs)
+
+    if close_connection_before_exit:
+            con.close()
+
+
+def load_pnls_4settle_date(**kwargs):
+
+    if 'con' not in kwargs.keys():
+        close_connection_before_exit = True
+        con = msu.get_my_sql_connection(**kwargs)
+        kwargs['con'] = con
+    else:
+        close_connection_before_exit = False
+        con = kwargs['con']
+
+    if not exp.is_business_day(double_date=kwargs['settle_date']):
+        if close_connection_before_exit:
+            con.close()
+        return
+
+    settle_date_ex = exp.doubledate_shift_bus_days(double_date=kwargs['settle_date'],shift_in_days=7)
+
+    indicator_frame = ops.get_option_ticker_indicators(settle_date=settle_date_ex,delta=0.5,
+                                                      column_names=['id','ticker','price_date','tr_dte','ticker_head'])
+
+    if indicator_frame.empty:
+        if close_connection_before_exit:
+            con.close()
+        return
+
+    indicator_frame.reset_index(drop=True,inplace=True)
+
+    delta_vol_output = [ops.calc_delta_vol_4ticker(ticker=x,
+                                                   settle_date=settle_date_ex,
+                                                   delta_target=0.5) for x in indicator_frame['ticker']]
+
+    delta_vol_output = pd.DataFrame(delta_vol_output)
+
+    indicator_frame['option_pnl5'] = delta_vol_output['option_pnl5']
+    indicator_frame['delta_pnl5'] = delta_vol_output['delta_pnl5']
+
+    indicator_frame.dropna(inplace=True)
+
+    column_names = indicator_frame.columns.tolist()
+
+    #indicator_frame['option_pnl5'] = indicator_frame['option_pnl5'].astype(object)
+    #indicator_frame['delta_pnl5'] = indicator_frame['delta_pnl5'].astype(object)
+
+    id_indx = column_names.index('id')
+    option_pnl_indx = column_names.index('option_pnl5')
+    delta_pnl_indx = column_names.index('delta_pnl5')
+
+    tuples = [tuple([x[option_pnl_indx],
+                    x[delta_pnl_indx],
+                    x[id_indx]]) for x in indicator_frame.values]
+
+    final_str = "UPDATE option_ticker_indicators SET option_pnl5 = %s,  delta_pnl5 = %s WHERE id=%s"
 
     msu.sql_execute_many_wrapper(final_str=final_str, tuples=tuples, con=con)
 

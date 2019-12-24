@@ -3,7 +3,7 @@
 import pandas as pd
 import os as os
 import math as m
-import shared.directory_names as dn
+import shared.directory_names_aux as dna
 import contract_utilities.contract_meta_info as cmi
 pd.options.mode.chained_assignment = None  # default='warn'
 import ta.portfolio_manager as tpm
@@ -39,12 +39,12 @@ conversion_from_man_ticker_head = {'06': 'SM',
                                    'GU': 'BP',
                                    'BC': 'B'}
 
-man_strike_multiplier = {'C': 100, 'S': 100, 'W': 100, 'BP': 0.01}
+man_strike_multiplier = {'C': 100, 'S': 100, 'W': 100, 'BP': 0.01, 'SI': 0.01}
 
 
 def load_and_convert_man_position_file(**kwargs):
 
-    positions_directory = dn.get_directory_name(ext='man_positions')
+    positions_directory = dna.get_directory_name(ext='man_positions')
 
     file_list = os.listdir(positions_directory)
     num_files = len(file_list)

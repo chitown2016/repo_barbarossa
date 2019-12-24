@@ -5,7 +5,7 @@ import ta.pnl as tpnl
 import contract_utilities.expiration as exp
 import shared.converters as sc
 import pandas as pd
-import shared.directory_names as dn
+import shared.directory_names_aux as dna
 
 
 def get_strategy_class_historical_pnls(**kwargs):
@@ -37,7 +37,7 @@ def get_strategy_class_historical_pnls(**kwargs):
     merged_pnl = pd.concat(time_series_list,axis=1,keys=unique_strategy_class_list).fillna(0)
     merged_pnl['total'] = merged_pnl.sum(axis=1)
 
-    output_dir = dn.get_directory_name(ext='daily')
+    output_dir = dna.get_directory_name(ext='daily')
     writer = pd.ExcelWriter(output_dir + '/historical_performance_' + str(as_of_date) + '.xlsx', engine='xlsxwriter')
     merged_pnl.to_excel(writer, sheet_name='timeSeries')
     writer.save()
