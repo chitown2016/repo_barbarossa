@@ -118,7 +118,7 @@ def get_db_ticker_from_ib_contract(**kwargs):
     if len(local_symbol_out) in [1,2]:
         contract_month_str = local_symbol_out[0][-2]
 
-        if local_symbol_out[0][-1]=='0':
+        if local_symbol_out[0][-1]=='0' and 0:
             contract_year_str = str(m.ceil(date_now / 10000))
         else:
             contract_year_str = str(m.floor(date_now / 100000)) + local_symbol_out[0][-1]

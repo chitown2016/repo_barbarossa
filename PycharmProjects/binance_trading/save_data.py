@@ -4,6 +4,7 @@ import get_price.get_binance_price as gbp
 import shared.calendar_utilities as cu
 import datetime as dt
 import shared.directory_names as dn
+import shared.directory_names_aux as dna
 import pandas as pd
 import os.path
 import time as tm
@@ -70,7 +71,7 @@ def save_daily_price_data4ticker(**kwargs):
 
     ticker = kwargs['ticker']
 
-    file_name = dn.get_directory_name(ext='binance') + '/daily/' + ticker + '.pkl'
+    file_name = dna.get_directory_name(ext='binance') + '/daily/' + ticker + '.pkl'
 
     if os.path.isfile(file_name):
         old_frame = pd.read_pickle(file_name)

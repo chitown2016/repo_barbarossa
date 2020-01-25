@@ -1,5 +1,5 @@
 
-import shared.directory_names as dn
+import shared.directory_names_aux as dna
 import shared.calendar_utilities as cu
 import get_price.save_stock_data as ssd
 import contract_utilities.expiration as exp
@@ -17,9 +17,9 @@ def get_stock_price_preloaded(**kwargs):
         data_source = 'iex'
 
     if data_source == 'iex':
-        file_dir = dn.get_directory_name(ext='iex_stock_data')
+        file_dir = dna.get_directory_name(ext='iex_stock_data')
     else:
-        file_dir = dn.get_directory_name(ext='stock_data')
+        file_dir = dna.get_directory_name(ext='stock_data')
 
     if 'stock_data_dictionary' in kwargs.keys():
         data_out = kwargs['stock_data_dictionary'][ticker]

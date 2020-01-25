@@ -298,8 +298,13 @@ def get_bollinger_deviation(**kwargs):
     data_frame_input = kwargs['data_frame_input']
     period = kwargs['period']
 
-    data_frame_input['bollinger_dev_' + str(period)] = (data_frame_input['close'] - data_frame_input['close'].rolling(window=period, center=False).mean()) / \
-                                                       data_frame_input['close'].rolling(window=period,center=False).std()
+    data_frame_input['bollinger_mean_' + str(period)] = data_frame_input['close'].rolling(window=period, center=False).mean()
+    data_frame_input['bollinger_std_' + str(period)] = data_frame_input['close'].rolling(window=period,center=False).std()
+    data_frame_input['bollinger_dev_' + str(period)] = (data_frame_input['close'] - data_frame_input['bollinger_mean_' + str(period)]) / \
+                                                       data_frame_input['bollinger_std_' + str(period)]
+
+    data_frame_input['bollinger_upper_' + str(period)] = data_frame_input['bollinger_mean_' + str(period)] + 2*data_frame_input['bollinger_std_' + str(period)]
+    data_frame_input['bollinger_lower_' + str(period)] = data_frame_input['bollinger_mean_' + str(period)] - 2*data_frame_input['bollinger_std_' + str(period)]
 
     return data_frame_input
 

@@ -324,6 +324,8 @@ def get_strategy_pnl(**kwargs):
 
     if stock_strategy_Q:
 
+        return  {'pnl_frame': pd.DataFrame(), 'daily_pnl': np.nan, 'total_pnl': np.nan}
+
         unique_ticker_list = trades_frame['ticker'].unique()
         stock_data_dictionary = {x: gsp.get_stock_price_preloaded(ticker=x) for x in unique_ticker_list}
 

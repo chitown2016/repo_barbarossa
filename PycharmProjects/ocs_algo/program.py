@@ -13,7 +13,7 @@ import contract_utilities.expiration as exp
 import api_utils.portfolio as aup
 import shared.utils as su
 import shared.calendar_utilities as cu
-import shared.directory_names as dn
+import shared.directory_names_aux as dna
 import numpy as np
 import pandas as pd
 import math as mth
@@ -34,7 +34,7 @@ import shared.log as lg
 def main():
     app = algo.Algo()
 
-    admin_dir = dn.get_directory_name(ext='admin')
+    admin_dir = dna.get_directory_name(ext='admin')
     risk_file_out = su.read_text_file(file_name=admin_dir + '/RiskParameter.txt')
     app.bet_size = float(risk_file_out[0])
 

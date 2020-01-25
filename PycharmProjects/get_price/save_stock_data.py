@@ -1,6 +1,6 @@
 
 import shared.downloads as sd
-import shared.directory_names as dn
+import shared.directory_names_aux as dna
 import shared.utils as su
 import contract_utilities.expiration as exp
 import shared.calendar_utilities as cu
@@ -24,7 +24,7 @@ def get_symbol_frame(**kwargs):
     elif frame_type=='other':
         symbol_address = other_symbol_address
 
-    output_dir = dn.get_directory_name(ext='stock_data')
+    output_dir = dna.get_directory_name(ext='stock_data')
     file_name = output_dir + '/' + frame_type + '_' + str(settle_date) + '.pkl'
 
     if os.path.isfile(file_name):
@@ -75,9 +75,9 @@ def save_stock_data(**kwargs):
 
     data_source = kwargs['data_source']
     if data_source == 'iex':
-        output_dir = dn.get_directory_name(ext='iex_stock_data')
+        output_dir = dna.get_directory_name(ext='iex_stock_data')
     else:
-        output_dir = dn.get_directory_name(ext='stock_data')
+        output_dir = dna.get_directory_name(ext='stock_data')
 
     for i in range(len(symbol_list)):
         file_name = output_dir + '/' + symbol_list[i] + '.pkl'

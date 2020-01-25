@@ -10,7 +10,7 @@ import get_price.get_futures_price as gfp
 import api_utils.portfolio as aup
 import shared.utils as su
 import shared.calendar_utilities as cu
-import shared.directory_names as sd
+import shared.directory_names_aux as dna
 import numpy as np
 import pandas as pd
 import math as mth
@@ -49,7 +49,7 @@ def save_ib_data(**kwargs):
     ticker_frame.drop_duplicates(subset=['ticker_head'], keep='first', inplace=True)
 
     app.ticker_list = list(ticker_frame['ticker'])
-    app.output_dir = sd.get_directory_name(ext='ib_data')
+    app.output_dir = dna.get_directory_name(ext='ib_data')
     app.durationStr = duration_str
     app.con = con
 
