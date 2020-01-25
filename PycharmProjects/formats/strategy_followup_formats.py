@@ -108,6 +108,9 @@ def generate_spread_carry_followup_report(**kwargs):
     spread_carry_indx = [x == 'spread_carry' for x in strategy_class_list]
     spread_carry_frame = strategy_frame[spread_carry_indx]
 
+    if spread_carry_frame.empty:
+        return writer
+
     results = [sf.get_results_4strategy(alias=spread_carry_frame['alias'].iloc[x],
                                         strategy_info_output=spread_carry_frame.iloc[x],
                                         con=con)
@@ -221,6 +224,10 @@ def generate_ocs_followup_report(**kwargs):
 
     ocs_indx = [x == 'ocs' for x in strategy_class_list]
     ocs_frame = strategy_frame[ocs_indx]
+
+    if ocs_frame.empty:
+        writer.save()
+        return
 
     results = [sf.get_results_4strategy(alias=ocs_frame['alias'].iloc[x],strategy_info_output=ocs_frame.iloc[x], con=con, broker=broker , date_to=as_of_date)
                for x in range(len(ocs_frame.index))]

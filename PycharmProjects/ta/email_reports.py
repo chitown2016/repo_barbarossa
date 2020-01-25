@@ -6,6 +6,7 @@ import contract_utilities.expiration as exp
 import shared.calendar_utilities as cu
 import ta.strategy as ts
 import ta.expiration_followup as ef
+import ta.portfolio_manager as tpm
 import signals.dual_momentum as dm
 
 
@@ -55,6 +56,30 @@ def send_hrsn_early_report(**kwargs):
 
     se.send_email_with_attachment(subject='hrsn_early_' + str(report_date),
                                   attachment_list = [ta_output_dir + '/' + 'pnl_early.xlsx'])
+
+def send_wh_report(**kwargs):
+
+    if 'report_date' in kwargs.keys():
+        report_date = kwargs['report_date']
+    else:
+        report_date = exp.doubledate_shift_bus_days()
+
+    ta_output_dir = dn.get_dated_directory_extension(folder_date=report_date, ext='ta')
+
+    strategy_frame = tpm.get_daily_pnl_snapshot(as_of_date=report_date, name='final')
+    total_pnl_row = strategy_frame[strategy_frame.alias == 'TOTAL']
+
+    report_date_str = cu.convert_datestring_format({'date_string': str(report_date), 'format_from': 'yyyymmdd', 'format_to': 'dd/mm/yyyy'})
+
+    se.send_email_with_attachment(send_from='mtulum@whtrading.com',
+                                  send_to=['mtulum@whtrading.com','whobert@whtrading.com'],
+                                  sender_account_alias='wh_trading',
+                                  subject='Daily PnL for ' + report_date_str + ' is: ' + '${:,}'.format(total_pnl_row['daily_pnl'].iloc[0]),
+                                  email_text='See attached for individual strategy pnls.',
+                                  attachment_list = [ta_output_dir + '/' + 'pnl_final.xlsx'],
+                                  attachment_name_list=['PnLs.xlsx'])
+
+
 
 
 

@@ -6,6 +6,8 @@ with warnings.catch_warnings():
     warnings.filterwarnings("ignore",category=FutureWarning)
     import h5py
 
+warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
+
 import shared.log as lg
 log = lg.get_logger(file_identifier='evening_job',log_level='INFO')
 

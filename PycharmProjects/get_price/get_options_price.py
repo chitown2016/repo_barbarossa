@@ -80,7 +80,7 @@ def load_aligend_options_data_file(**kwargs):
             data_frame_out = pd.DataFrame(mat_output['alignedDataMatrix'], columns=column_names)
         except Exception:
             mat_output = h5py.File(option_data_dir+'/'+file_dir)
-            data_frame_out = pd.DataFrame(mat_output['alignedDataMatrix'].value.transpose(), columns=column_names)
+            data_frame_out = pd.DataFrame(mat_output['alignedDataMatrix'][()].transpose(), columns=column_names)
     else:
         data_frame_out = pd.DataFrame(columns=column_names)
 

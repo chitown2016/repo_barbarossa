@@ -34,16 +34,31 @@ def send_email_with_attachment(**kwargs):
     else:
         email_text = ''
 
+    if 'sender_account_alias' in kwargs.keys():
+        sender_account_alias = kwargs['sender_account_alias']
+    else:
+        sender_account_alias = 'kocatulum@gmail.com'
+
     if 'attachment_list' in kwargs.keys():
         attachment_list = kwargs['attachment_list']
     else:
         attachment_list = []
 
+    if 'attachment_name_list' in kwargs.keys():
+        attachment_name_list = kwargs['attachment_name_list']
+    else:
+        attachment_name_list = []
+
     subject = kwargs['subject']
 
     msg = MIMEMultipart()
     msg['From'] = send_from
-    msg['To'] = send_to
+
+    if isinstance(send_to,list):
+        msg['To'] = ','.join(send_to)
+    else:
+        msg['To'] = send_to
+
     msg['Date'] = formatdate(localtime=True)
     msg['Subject'] = subject
 
@@ -55,13 +70,22 @@ def send_email_with_attachment(**kwargs):
                 part = MIMEBase('application', "octet-stream")
                 part.set_payload(open(attachment_list[i], "rb").read())
                 encoders.encode_base64(part)
-                part.add_header('Content-Disposition', 'attachment; filename=file-' + str(i+1) + '.xlsx' + '')
+                if len(attachment_name_list)!=len(attachment_list):
+                    part.add_header('Content-Disposition', 'attachment; filename=file-' + str(i+1) + '.xlsx' + '')
+                else:
+                    part.add_header('Content-Disposition', 'attachment; filename=' + attachment_name_list[i])
                 msg.attach(part)
 
-    server = smtplib.SMTP('smtp.gmail.com:587')
+    if sender_account_alias=='kocatulum@gmail.com':
+        server = smtplib.SMTP('smtp.gmail.com:587')
+    elif sender_account_alias=='wh_trading':
+        server = smtplib.SMTP('10.3.0.253',25)
+
     server.ehlo()
-    server.starttls()
-    server.login(username,password)
+
+    if sender_account_alias=='kocatulum@gmail.com':
+        server.starttls()
+        server.login(username,password)
 
     server.sendmail(send_from, send_to, msg.as_string())
     server.quit()

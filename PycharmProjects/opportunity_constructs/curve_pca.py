@@ -79,30 +79,30 @@ def get_curve_pca_report(**kwargs):
 
         month_spread = [1]*(len(rolling_data_monthly)-1)+[6]*(len(rolling_data_semiannual)-1)+[12]*(len(rolling_data_annual)-1)
 
-    yield_raw = [(merged_data['close_price'].ix[:, x]-merged_data['close_price'].ix[:, x+1]) /
-                 merged_data['close_price'].ix[:, x+1] for x in total_range if x not in index_exclude]
+    yield_raw = [(merged_data['close_price'].iloc[:, x]-merged_data['close_price'].iloc[:, x+1]) /
+                 merged_data['close_price'].iloc[:, x+1] for x in total_range if x not in index_exclude]
     yield_merged = pd.concat(yield_raw, axis=1)
     yield_data = 100*yield_merged.values
 
-    change5_raw = [(merged_data['change5'].ix[:, x]-merged_data['change5'].ix[:, x+1]) for x in total_range
+    change5_raw = [(merged_data['change5'].iloc[:, x]-merged_data['change5'].iloc[:, x+1]) for x in total_range
                    if x not in index_exclude]
 
     change5_merged = pd.concat(change5_raw, axis=1)
     change5_data = change5_merged.values
 
-    change10_raw = [(merged_data['change10'].ix[:, x]-merged_data['change10'].ix[:, x+1]) for x in total_range
+    change10_raw = [(merged_data['change10'].iloc[:, x]-merged_data['change10'].iloc[:, x+1]) for x in total_range
                    if x not in index_exclude]
 
     change10_merged = pd.concat(change10_raw, axis=1)
     change10_data = change10_merged.values
 
-    change20_raw = [(merged_data['change20'].ix[:, x]-merged_data['change20'].ix[:, x+1]) for x in total_range
+    change20_raw = [(merged_data['change20'].iloc[:, x]-merged_data['change20'].iloc[:, x+1]) for x in total_range
                    if x not in index_exclude]
 
     change20_merged = pd.concat(change20_raw, axis=1)
     change20_data = change20_merged.values
 
-    tr_dte_raw = [merged_data['tr_dte'].ix[:, x] for x in total_range if x not in index_exclude]
+    tr_dte_raw = [merged_data['tr_dte'].iloc[:, x] for x in total_range if x not in index_exclude]
     tr_dte_merged = pd.concat(tr_dte_raw, axis=1)
     tr_dte_data = tr_dte_merged.values
 
@@ -110,10 +110,10 @@ def get_curve_pca_report(**kwargs):
     ticker_month_merged = pd.concat(ticker_month_raw, axis=1)
     ticker_month_data = ticker_month_merged.values
 
-    ticker1_list = [merged_data['ticker'].ix[-1, x] for x in total_range if x not in index_exclude]
-    ticker2_list = [merged_data['ticker'].ix[-1, x+1] for x in total_range if x not in index_exclude]
+    ticker1_list = [merged_data['ticker'].iloc[-1, x] for x in total_range if x not in index_exclude]
+    ticker2_list = [merged_data['ticker'].iloc[-1, x+1] for x in total_range if x not in index_exclude]
 
-    price_list = [(merged_data['close_price'].ix[-1, x]-merged_data['close_price'].ix[-1, x+1]) for x in total_range
+    price_list = [(merged_data['close_price'].iloc[-1, x]-merged_data['close_price'].iloc[-1, x+1]) for x in total_range
                   if x not in index_exclude]
 
     pca_out = stats.get_pca(data_input=yield_data, n_components=2)

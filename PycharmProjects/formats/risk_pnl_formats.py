@@ -60,5 +60,7 @@ def generate_portfolio_pnl_report(**kwargs):
     worksheet_strategies.autofilter(0, 0, len(daily_pnl_frame.index),
                               len(daily_pnl_frame.columns))
 
+    writer.save()
+
 
 

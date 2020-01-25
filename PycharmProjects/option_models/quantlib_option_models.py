@@ -38,15 +38,6 @@ def get_option_greeks(**kwargs):
             'cal_dte': cal_dte,
             'gamma': np.NaN}
 
-    #print(underlying)
-    #print(kwargs['option_price'])
-    #print(option_type)
-    #print(exercise_type)
-    #print(risk_free_rate)
-    #print(expiration_date)
-    #print(calculation_date)
-    #print(strike)
-
     if 'option_price' in kwargs.keys():
         if option_type == 'C':
             if kwargs['option_price']+strike-underlying <= 10**(-12):
@@ -122,6 +113,7 @@ def get_option_greeks(**kwargs):
     if 'option_price' in kwargs.keys():
         try:
             implied_vol = option_obj.impliedVolatility(targetValue=kwargs['option_price'], process=bsm_process,accuracy=0.00001)
+
             flat_vol_ts_obj = ql.BlackVolTermStructureHandle(ql.BlackConstantVol(calculation_date_obj, calendar_obj, implied_vol, day_count_obj))
             #bsm_process = ql.BlackScholesMertonProcess(underlying_obj, dividend_yield_obj, flat_ts_obj, flat_vol_ts_obj)
             bsm_process = ql.BlackProcess(underlying_obj, flat_ts_obj, flat_vol_ts_obj)

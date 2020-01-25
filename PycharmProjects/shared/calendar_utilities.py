@@ -33,6 +33,8 @@ def convert_datestring_format(cu_input):
 
     if format_to=='yyyy-mm-dd':
         datestring_out = datetime_out.strftime('%Y-%m-%d')
+    elif format_to=='dd/mm/yyyy':
+        datestring_out = datetime_out.strftime('%d/%m/%Y')
 
     return datestring_out
 

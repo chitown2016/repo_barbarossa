@@ -12,7 +12,7 @@ CREATE TABLE `exchange` (
   `created_date` datetime NOT NULL,
   `last_updated_date` datetime NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=UTF8MB4;
 
 CREATE TABLE `data_vendor` (
   `id` int NOT NULL AUTO_INCREMENT,
@@ -22,7 +22,7 @@ CREATE TABLE `data_vendor` (
   `created_date` datetime NOT NULL,
   `last_updated_date` datetime NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=UTF8MB4;
 
 CREATE TABLE `symbol` (
   `id` int NOT NULL AUTO_INCREMENT,
@@ -40,7 +40,7 @@ CREATE TABLE `symbol` (
   `last_updated_date` datetime NOT NULL,
   PRIMARY KEY (`id`),
   KEY `index_exchange_id` (`exchange_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=UTF8MB4;
 
 ALTER TABLE `symbol`
 ADD UNIQUE INDEX `unique_ticker` (`ticker`,`instrument`);
@@ -56,25 +56,20 @@ CREATE TABLE `daily_price` (
   `tr_dte` int NOT NULL,
   `created_date` datetime NOT NULL,
   `last_updated_date` datetime NOT NULL,
-  `open_price` decimal(19,4) NULL,
-  `high_price` decimal(19,4) NULL,
-  `low_price` decimal(19,4) NULL,
-  `close_price` decimal(19,4) NULL,
+  `open_price` decimal(19,8) NULL,
+  `high_price` decimal(19,8) NULL,
+  `low_price` decimal(19,8) NULL,
+  `close_price` decimal(19,8) NULL,
   `volume` bigint NULL,
   `open_interest` bigint NULL,
   PRIMARY KEY (`id`),
   KEY `index_data_vendor_id` (`data_vendor_id`),
   KEY `index_synbol_id` (`symbol_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=UTF8MB4;
 
 
 ALTER TABLE `daily_price`
 ADD UNIQUE INDEX `ticker_day` (`symbol_id`,`price_date`);
-
-ALTER TABLE `daily_price` MODIFY `open_price` decimal(19,8) NULL
-ALTER TABLE `daily_price` MODIFY `high_price` decimal(19,8) NULL
-ALTER TABLE `daily_price` MODIFY `low_price` decimal(19,8) NULL
-ALTER TABLE `daily_price` MODIFY `close_price` decimal(19,8) NULL
 
 
 CREATE TABLE `daily_option_price` (
@@ -128,7 +123,7 @@ CREATE TABLE `daily_option_price` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `ticker_day` (`ticker`,`option_type`,`strike`,`price_date`),
   KEY `index_data_vendor_id` (`data_vendor_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=UTF8MB4;
 
 
 CREATE TABLE `option_ticker_indicators`(
@@ -143,7 +138,7 @@ CREATE TABLE `option_ticker_indicators`(
 `delta` decimal(5,3) NULL,
 `strike` decimal(19,4) NULL,
 `theta` decimal(15,8) NULL,
-`close2close_vol20` decimal(5,3) NULL,
+`close2close_vol20` decimal(6,3) NULL,
 `option_pnl5` decimal(15,8) NULL,
 `delta_pnl5` decimal(15,8) NULL,
 `aux_ind1` decimal(5,3) NULL,
@@ -158,9 +153,8 @@ CREATE TABLE `option_ticker_indicators`(
 `last_updated_date` datetime NOT NULL,
 PRIMARY KEY (`id`),
 UNIQUE KEY `ticker_day` (`ticker`,`price_date`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=UTF8MB4;
 
-ALTER TABLE `option_ticker_indicators` MODIFY `close2close_vol20` decimal(6,3) NULL
 
 
 
@@ -175,7 +169,7 @@ CREATE TABLE `strategy` (
 `description_string` varchar(1000) NOT NULL,
 PRIMARY KEY (`id`),
 UNIQUE KEY (`alias`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=UTF8MB4;
 
 
 
@@ -184,22 +178,20 @@ CREATE TABLE `trades` (
 `id` int NOT NULL AUTO_INCREMENT,
 `ticker` varchar(32) NOT NULL,
 `option_type` varchar(32) NULL,
-`strike_price` int NULL,
+`strike_price` decimal(19,4) NULL,
 `strategy_id` int NOT NULL,
 `trade_price` decimal(19,4) NULL,
-`trade_quantity` int NOT NULL,
+`trade_quantity` decimal(19,2) NULL,
 `trade_date` datetime NOT NULL,
 `instrument` varchar(64) NOT NULL,
-`real_tradeQ` tinyint(1) NOT NULL,
+`real_tradeQ` tinyint NOT NULL,
 `created_date` datetime NOT NULL,
 `last_updated_date` datetime NOT NULL,
 PRIMARY KEY (`id`),
 KEY `index_strategy_id` (`strategy_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=UTF8MB4;
 
-#Modifications:
-ALTER TABLE `trades` MODIFY `trade_quantity` decimal(19,2) NULL
-ALTER TABLE `trades` MODIFY `strike_price` decimal(19,4) NULL
+
 
 
 

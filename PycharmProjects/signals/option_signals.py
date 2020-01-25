@@ -19,8 +19,6 @@ warnings.filterwarnings("ignore", message="invalid value encountered in sign")
 
 def get_vcs_signals(**kwargs):
 
-    print(kwargs['ticker_list'])
-
     aligned_indicators_output = get_aligned_option_indicators(**kwargs)
 
     if not aligned_indicators_output['success']:
@@ -50,10 +48,10 @@ def get_vcs_signals(**kwargs):
     hist_1year = hist[hist.index >= settle_datetime_1year_back]
 
     q = stats.get_quantile_from_number({'x': atm_vol_ratio,
-                                        'y': hist['atm_vol_ratio'].values, 'clean_num_obs': max(100, round(3*len(hist.index)/4))})
+                                        'y': hist['atm_vol_ratio'].to_numpy(), 'clean_num_obs': max(100, round(3*len(hist.index)/4))})
 
     q1 = stats.get_quantile_from_number({'x': atm_vol_ratio,
-                                        'y': hist_1year['atm_vol_ratio'].values, 'clean_num_obs': max(50, round(3*len(hist_1year.index)/4))})
+                                        'y': hist_1year['atm_vol_ratio'].to_numpy(), 'clean_num_obs': max(50, round(3*len(hist_1year.index)/4))})
 
     fwd_var = hist['c2']['cal_dte']*(hist['c2']['imp_vol']**2)-hist['c1']['cal_dte']*(hist['c1']['imp_vol']**2)
     fwd_vol_sq = fwd_var/(hist['c2']['cal_dte']-hist['c1']['cal_dte'])
@@ -65,7 +63,7 @@ def get_vcs_signals(**kwargs):
     fwd_vol_adj = np.sign(fwd_vol_sq)*(np.sqrt(abs(fwd_vol_sq)))
 
     fwd_vol_q = stats.get_quantile_from_number({'x': fwd_vol_adj,
-                                        'y': hist['fwd_vol_adj'].values, 'clean_num_obs': max(100, round(3*len(hist.index)/4))})
+                                        'y': hist['fwd_vol_adj'].to_numpy(), 'clean_num_obs': max(100, round(3*len(hist.index)/4))})
 
     clean_indx = hist['c1']['profit5'].notnull()
     clean_data = hist[clean_indx]
@@ -78,9 +76,9 @@ def get_vcs_signals(**kwargs):
         clean_data = clean_data[clean_data.index >= last_available_align_date-dt.timedelta(5*365)]
         profit5 = clean_data['c1']['profit5']-clean_data['c2']['profit5']
 
-        percentile_vector = stats.get_number_from_quantile(y=profit5.values,
+        percentile_vector = stats.get_number_from_quantile(y=profit5.to_numpy(),
                                                        quantile_list=[1, 15, 85, 99],
-                                                       clean_num_obs=max(100, round(3*len(profit5.values)/4)))
+                                                       clean_num_obs=max(100, round(3*len(profit5.to_numpy())/4)))
 
         downside = (percentile_vector[0]+percentile_vector[1])/2
         upside = (percentile_vector[2]+percentile_vector[3])/2
@@ -328,8 +326,6 @@ def get_aligned_option_indicators(**kwargs):
     ticker_list = kwargs['ticker_list']
     settle_datetime = cu.convert_doubledate_2datetime(kwargs['settle_date'])
 
-    #print(ticker_list)
-
     if 'num_cal_days_back' in kwargs.keys():
         num_cal_days_back = kwargs['num_cal_days_back']
     else:
@@ -386,6 +382,7 @@ def get_aligned_option_indicators(**kwargs):
         close2close_vol20_list.append(ticker_data['close2close_vol20'].iloc[0])
         volume_list.append(ticker_data['volume'].iloc[0])
         open_interest_list.append(ticker_data['open_interest'].iloc[0])
+
 
     current_data = pd.DataFrame.from_dict({'ticker': ticker_list,
                              'tr_dte': tr_dte_list,

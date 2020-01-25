@@ -60,6 +60,8 @@ def generate_futures_butterfly_formatted_output(**kwargs):
     worksheet_all.autofilter(0, 0, len(butterflies_w_selected_columns.index),
                                    len(butterflies_w_selected_columns.columns))
 
+    writer.save()
+
 
 def generate_spread_carry_formatted_output(**kwargs):
 
@@ -75,6 +77,7 @@ def generate_spread_carry_formatted_output(**kwargs):
 
     writer = pd.ExcelWriter(output_dir + '/' + futil.get_xls_file_name('spread_carry') + '.xlsx', engine='xlsxwriter')
     spread_report.to_excel(writer, sheet_name='summary')
+    writer.save()
 
 
 def generate_curve_pca_formatted_output(**kwargs):
@@ -115,6 +118,7 @@ def generate_curve_pca_formatted_output(**kwargs):
             worksheet_good.autofilter(0, 0, len(good_spreads.index), len(selected_column_list))
 
             worksheet_all.autofilter(0, 0, len(all_spreads.index), len(selected_column_list))
+    writer.save()
 
 
 def generate_ifs_formatted_output(**kwargs):
@@ -153,6 +157,8 @@ def generate_ocs_formatted_output(**kwargs):
 
     overnight_calendars.to_excel(writer, sheet_name='all')
 
+    writer.save()
+
 
 def generate_outright_summary_formatted_output(**kwargs):
 
@@ -186,4 +192,7 @@ def generate_outright_summary_formatted_output(**kwargs):
     worksheet_all = writer.sheets['all']
     worksheet_all.freeze_panes(1, 0)
     worksheet_all.autofilter(0, 0, len(sheet_4date.index),len(sheet_4date.columns))
+    writer.save()
+
+
 

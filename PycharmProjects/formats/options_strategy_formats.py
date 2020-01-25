@@ -48,6 +48,8 @@ def generate_vcs_formatted_output(**kwargs):
     worksheet_all.autofilter(0, 0, len(vcs_pairs_w_selected_columns.index),
                                    len(vcs_pairs_w_selected_columns.columns))
 
+    writer.save()
+
 
 def generate_scv_formatted_output(**kwargs):
 
@@ -58,8 +60,8 @@ def generate_scv_formatted_output(**kwargs):
 
     output_dir = ts.create_strategy_output_dir(strategy_class='scv', report_date=report_date)
 
-    vcs_output = scv.generate_scv_sheet_4date(date_to=report_date)
-    scv_frame = vcs_output['scv_frame']
+    scv_output = scv.generate_scv_sheet_4date(date_to=report_date)
+    scv_frame = scv_output['scv_frame']
 
     filter_out = of.get_scv_filters(data_frame_input=scv_frame, filter_list=['long1', 'short1'])
     good_scv_frame = filter_out['selected_frame']
@@ -80,4 +82,6 @@ def generate_scv_formatted_output(**kwargs):
 
     worksheet_all.autofilter(0, 0, len(scv_frame.index),
                                    len(scv_frame.columns))
+
+    writer.save()
 

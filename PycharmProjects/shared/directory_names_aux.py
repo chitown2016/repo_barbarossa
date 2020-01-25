@@ -43,7 +43,7 @@ def get_directory_name(**kwargs):
 
     ext = kwargs['ext']
 
-    if computer_name == '601-TREKW71' or computer_name == '601-TREKW72' or computer_name=='601-TREKW74':
+    if computer_name in ['601-TREKW71', '601-TREKW72' ,'601-TREKW74', 'PR-ETRADE01']:
         if ext in ['ib_data', 'drop_box_trading']:
             root_dir = root_work_dropbox
         else:

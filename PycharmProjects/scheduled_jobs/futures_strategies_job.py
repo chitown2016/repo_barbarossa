@@ -5,6 +5,8 @@ with warnings.catch_warnings():
     warnings.filterwarnings("ignore",category=FutureWarning)
     import h5py
 
+warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
+
 import formats.futures_strategy_formats as fsf
 import formats.strategy_followup_formats as sff
 import formats.risk_pnl_formats as rpf
@@ -58,11 +60,6 @@ except Exception:
 try:
     rpf.generate_portfolio_pnl_report(as_of_date=report_date, con=con, name='final')
     prep.move_from_dated_folder_2daily_folder(ext='ta', file_name='pnl_final', folder_date=report_date)
-except Exception:
-    pass
-
-try:
-    fsf.generate_outright_summary_formatted_output(report_date=report_date)
 except Exception:
     pass
 

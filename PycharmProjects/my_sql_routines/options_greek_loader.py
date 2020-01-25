@@ -24,8 +24,6 @@ def update_options_greek_database_4ticker(**kwargs):
 
     option_greeks = osc.cal_greeks_4option_maturity(**kwargs)
 
-    #print(option_greeks)
-
     if option_greeks.empty:
         return
 

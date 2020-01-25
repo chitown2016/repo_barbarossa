@@ -99,6 +99,11 @@ def get_regression_results(regression_input):
     else:
         clean_num_obs = round(3*len(y)/4)
 
+    x[x > 1e308] = np.nan
+    x[x < -1e308] = np.nan
+    y[y > 1e308] = np.nan
+    y[y < -1e308] = np.nan
+
     nan_indx_x = np.isnan(x)
     nan_indx_y = np.isnan(y)
 
