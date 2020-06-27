@@ -12,6 +12,7 @@ import contract_utilities.expiration as exp
 import get_price.get_futures_price as gfp
 import get_price.get_options_price as gop
 import time as tm
+import risk.position_sizing as ps
 pd.options.mode.chained_assignment = None
 
 def generate_db_strategy_from_strategy_sheet(**kwargs):
@@ -80,6 +81,17 @@ def get_net_position_4strategy_alias(**kwargs):
 
     return net_position[net_position['qty'] != 0]
 
+def generate_db_strategy_from_alias_and_class(**kwargs):
+
+    alias = kwargs['alias']
+    strategy_class = kwargs['strategy_class']
+
+    if strategy_class == 'ocs':
+        target_size = ps.get_strategy_target_size(strategy_class='ocs')
+        split_out = alias.split('_')
+        description_string = 'strategy_class=ocs&betsize=' + str(target_size) + '&ticker1=' + split_out[0] + '&ticker2=' + split_out[1]
+
+    return generate_db_strategy_from_alias(alias=alias,description_string=description_string)
 
 def generate_db_strategy_from_alias(**kwargs):
 
@@ -246,6 +258,11 @@ def move_position_from_strategy_2_strategy(**kwargs):
         as_of_date = exp.doubledate_shift_bus_days()
         kwargs['as_of_date'] = as_of_date
 
+    if 'pricing_date' in kwargs.keys():
+        pricing_date = kwargs['pricing_date']
+    else:
+        pricing_date = as_of_date
+
     net_position_frame = get_net_position_4strategy_alias(alias=strategy_from, **kwargs)
 
     target_strategy_id = get_strategy_id_from_alias(alias=strategy_to, **kwargs)
@@ -255,14 +272,14 @@ def move_position_from_strategy_2_strategy(**kwargs):
     options_position_frame = net_position_frame[net_position_frame['instrument'] == 'O']
 
     futures_position_frame['trade_price'] = \
-        [float(gfp.get_futures_price_4ticker(ticker=x,date_from=as_of_date,date_to=as_of_date,con=con)['close_price'][0]) for x in futures_position_frame['ticker']]
+        [float(gfp.get_futures_price_4ticker(ticker=x,date_from=pricing_date,date_to=pricing_date,con=con)['close_price'][0]) for x in futures_position_frame['ticker']]
 
     if not options_position_frame.empty:
         options_position_frame['trade_price'] = options_position_frame.apply(lambda row: gop.get_options_price_from_db(ticker=row['ticker'],
                                                                     strike=row['strike_price'],
                                                                     option_type=row['option_type'],con=con,
                                                                     return_nan_if_emptyQ=True,
-                                                                    settle_date=as_of_date)['close_price'][0], axis=1)
+                                                                    settle_date=pricing_date)['close_price'][0], axis=1)
 
         net_position_frame = pd.concat([futures_position_frame,options_position_frame])
     else:

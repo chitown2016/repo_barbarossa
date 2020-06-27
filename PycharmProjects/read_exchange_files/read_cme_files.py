@@ -8,7 +8,6 @@ import os.path
 def read_cme_settle_txt_files(**kwargs):
 
     file_name = kwargs['file_name']
-
     report_date = kwargs['report_date']
 
     options_data_dir = dn.get_dated_directory_extension(folder_date=report_date, ext='raw_options_data')
@@ -39,7 +38,7 @@ def read_cme_settle_txt_files(**kwargs):
         if any(x in decoded_data[indx] for x in ['OPTIONS', 'OPTION', 'Options', 'Option', 'FUTURE', 'Future',
                                                  'CSO', 'AIRASIA', 'SYNTH', 'BURSA', 'SPRD', 'Spread',
                                                  'CROSSRATE', 'WEEKLY', 'CALL', 'PUT','UTILITIES','CONSUMER','SP 500','sector','SP500',
-                                                 'NQ', 'S&P','WHEAT']):
+                                                 'NQ', 'S&P','Black','Sea','WHEAT','Wheat','Financially','Settled']):
             title_list.append(decoded_data[indx])
 
             if len(data_start_list) == 0:
@@ -176,7 +175,7 @@ def process_title(title_input):
         title_indx = title_list.index('MY')+2
     elif title_list[0] == 'SM' and asset_type == 'futures':
         ticker_head = 'SM'
-    elif 'Soybean Oil' in title_input and asset_type == 'options':
+    elif 'Soybean Oil' in title_input and 'Short-Dated' not in title_input and asset_type == 'options':
         ticker_head = 'BO'
         title_indx = title_list.index('OYC')+2
     elif title_list[0] == 'BO' and asset_type == 'futures':

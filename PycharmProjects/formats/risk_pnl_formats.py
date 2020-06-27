@@ -38,6 +38,9 @@ def generate_historic_risk_report(**kwargs):
     worksheet_ticker_heads.autofilter(0, 0, len(ticker_head_risk_frame.index),
                                    len(ticker_head_risk_frame.columns))
 
+    writer.save()
+
+
 
 def generate_portfolio_pnl_report(**kwargs):
 

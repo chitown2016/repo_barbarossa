@@ -2,6 +2,7 @@
 import shared.email as se
 import shared.directory_names as dn
 import shared.directory_names_aux as dna
+import shared.utils as su
 import contract_utilities.expiration as exp
 import shared.calendar_utilities as cu
 import ta.strategy as ts
@@ -45,7 +46,7 @@ def send_hrsn_report(**kwargs):
                                                      '/' + 'followup_' + str(report_date) + '.xlsx'])
 
 
-def send_hrsn_early_report(**kwargs):
+def send_pnl_early_report(**kwargs):
 
     if 'report_date' in kwargs.keys():
         report_date = kwargs['report_date']
@@ -54,8 +55,28 @@ def send_hrsn_early_report(**kwargs):
 
     ta_output_dir = dn.get_dated_directory_extension(folder_date=report_date,ext='ta')
 
-    se.send_email_with_attachment(subject='hrsn_early_' + str(report_date),
-                                  attachment_list = [ta_output_dir + '/' + 'pnl_early.xlsx'])
+    se.send_email_with_attachment(send_from='mtulum@whtrading.com',
+                                  send_to='mtulum@whtrading.com',
+                                  sender_account_alias='wh_trading',
+                                  subject='pnl_early_' + str(report_date),
+                                  attachment_list = [ta_output_dir + '/' + 'pnl_early.xlsx'],
+                                  attachment_name_list=['PnLs.xlsx'])
+
+def send_followup_report(**kwargs):
+
+    if 'report_date' in kwargs.keys():
+        report_date = kwargs['report_date']
+    else:
+        report_date = exp.doubledate_shift_bus_days()
+
+    ta_output_dir = dn.get_dated_directory_extension(folder_date=report_date,ext='ta')
+
+    se.send_email_with_attachment(send_from='mtulum@whtrading.com',
+                                  send_to='mtulum@whtrading.com',
+                                  sender_account_alias='wh_trading',
+                                  subject='followup_' + str(report_date),
+                                  attachment_list = [ta_output_dir + '/' + 'followup.xlsx'],
+                                  attachment_name_list=['Followup.xlsx'])
 
 def send_wh_report(**kwargs):
 
@@ -71,11 +92,18 @@ def send_wh_report(**kwargs):
 
     report_date_str = cu.convert_datestring_format({'date_string': str(report_date), 'format_from': 'yyyymmdd', 'format_to': 'dd/mm/yyyy'})
 
+    config_output = su.read_config_file(file_name=dna.get_directory_name(ext='daily') + '/riskAndMargin.txt')
+
+    email_text = "Expected Maximum Drawdown: "  + config_output['emd'] + "K" + \
+                 "\nMargin: " + str(int(config_output['iceMargin']) + int(config_output['cmeMargin'])) + "K" + \
+                 "\nNet Liquidating Value: " + config_output['pnl'] + "K" + \
+                 "\n \nSee attached for individual strategy pnls."
+
     se.send_email_with_attachment(send_from='mtulum@whtrading.com',
                                   send_to=['mtulum@whtrading.com','whobert@whtrading.com'],
                                   sender_account_alias='wh_trading',
                                   subject='Daily PnL for ' + report_date_str + ' is: ' + '${:,}'.format(total_pnl_row['daily_pnl'].iloc[0]),
-                                  email_text='See attached for individual strategy pnls.',
+                                  email_text=email_text,
                                   attachment_list = [ta_output_dir + '/' + 'pnl_final.xlsx'],
                                   attachment_name_list=['PnLs.xlsx'])
 

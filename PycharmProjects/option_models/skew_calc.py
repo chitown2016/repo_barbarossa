@@ -17,6 +17,9 @@ def cal_greeks_4option_maturity(**kwargs):
     if option_prices.empty:
         return pd.DataFrame()
 
+    option_prices = option_prices[option_prices['strike'] > 0]
+    option_prices.reset_index(drop=True, inplace=True)
+
     contract_specs_out = cmi.get_contract_specs(kwargs['ticker'])
     exercise_type = cmi.get_option_exercise_type(**contract_specs_out)
 

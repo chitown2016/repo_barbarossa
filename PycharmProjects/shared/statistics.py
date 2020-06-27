@@ -99,16 +99,11 @@ def get_regression_results(regression_input):
     else:
         clean_num_obs = round(3*len(y)/4)
 
-    x[x > 1e308] = np.nan
-    x[x < -1e308] = np.nan
-    y[y > 1e308] = np.nan
-    y[y < -1e308] = np.nan
+    finite_indx_x = np.isfinite(x)
+    finite_indx_y = np.isfinite(y)
 
-    nan_indx_x = np.isnan(x)
-    nan_indx_y = np.isnan(y)
-
-    clean_y = [y[i] for i in range(len(y)) if not nan_indx_x[i] and not nan_indx_y[i]]
-    clean_x = [x[i] for i in range(len(y)) if not nan_indx_x[i] and not nan_indx_y[i]]
+    clean_y = [y[i] for i in range(len(y)) if finite_indx_x[i] and finite_indx_y[i]]
+    clean_x = [x[i] for i in range(len(y)) if finite_indx_x[i] and finite_indx_y[i]]
 
     if len(clean_x) < clean_num_obs:
         nan_matrix = np.empty((2,2))

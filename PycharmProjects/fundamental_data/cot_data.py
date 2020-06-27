@@ -52,7 +52,7 @@ def presave_cot_data_4ticker_head(**kwargs):
         old_data = pd.read_pickle(file_name)
         kwargs['date_from'] = int(1e4*old_data['settle_date'].iloc[-1].year+1e2*old_data['settle_date'].iloc[-1].month+old_data['settle_date'].iloc[-1].day)
 
-    quandl_ticker = 'CFTC/' + db_2_quandl_dictionary[ticker_head] + '_FO_ALL'
+    quandl_ticker = 'CFTC/' + db_2_quandl_dictionary[ticker_head] + '_FO_L_ALL'
 
     kwargs['quandl_ticker'] = quandl_ticker
     quandl_out = gdq.get_data(**kwargs)

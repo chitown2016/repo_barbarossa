@@ -1,6 +1,6 @@
 
 import contract_utilities.contract_lists as cl
-import shared.directory_names as dn
+import shared.directory_names_aux as dna
 import signals.intraday_futures_signals as ifs
 import pandas as pd
 import numpy as np
@@ -20,7 +20,7 @@ def get_spreads_4date(**kwargs):
     futures_dataframe['yearMonthMerge'] = futures_dataframe['yearMonth']
     futures_dataframe = futures_dataframe[['ticker','yearMonth','yearMonthMerge','ticker_head','volume']]
 
-    spread_frame = pd.read_excel(dn.get_directory_name(ext='python_file') + '/opportunity_constructs/user_defined_spreads.xlsx')
+    spread_frame = pd.read_excel(dna.get_directory_name(ext='python_file') + '/opportunity_constructs/user_defined_spreads.xlsx')
     output_frame = pd.DataFrame()
 
     for i in range(len(spread_frame.index)):
@@ -76,7 +76,7 @@ def get_spreads_4date(**kwargs):
             merged100 = pd.merge(merged10, frame3, how='inner', on='yearMonthMerge')
 
             output_frame3 = pd.concat([merged111,merged121,merged101,
-                                       merged112,merged122,merged110,merged100])
+                                       merged112,merged122,merged110,merged100],sort=True)
 
             spread_i = pd.DataFrame()
             spread_i['contract1'] = output_frame3['ticker_x']

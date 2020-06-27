@@ -2,7 +2,7 @@ __author__ = 'kocat_000'
 
 import datetime as dt
 
-three_letter_month_dictionary = {"JAN": 1, "MAR": 3,"MAY": 5, 'JUL': 7 , 'AUG': 8,'SEP': 9 ,'OCT':10,'NOV': 11, 'DEC': 12}
+three_letter_month_dictionary = {"JAN": 1, "FEB": 2, "MAR": 3, "APR": 4,"MAY": 5, "JUN": 6, 'JUL': 7 , 'AUG': 8,'SEP': 9 ,'OCT':10,'NOV': 11, 'DEC': 12}
 
 
 def convert_doubledate_2datetime(double_date):

@@ -106,7 +106,7 @@ def get_curve_pca_report(**kwargs):
     tr_dte_merged = pd.concat(tr_dte_raw, axis=1)
     tr_dte_data = tr_dte_merged.values
 
-    ticker_month_raw = [merged_data['ticker_month'].ix[:, x] for x in total_range if x not in index_exclude]
+    ticker_month_raw = [merged_data['ticker_month'].iloc[:, x] for x in total_range if x not in index_exclude]
     ticker_month_merged = pd.concat(ticker_month_raw, axis=1)
     ticker_month_data = ticker_month_merged.values
 

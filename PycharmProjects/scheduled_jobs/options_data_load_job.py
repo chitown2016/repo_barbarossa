@@ -28,6 +28,7 @@ import formats.risk_pnl_formats as rpf
 import ta.email_reports as er
 import ta.prepare_daily as prep
 import my_sql_routines.options_pnl_loader as opnl
+import contract_utilities.expiration as exp
 
 commodity_address = 'ftp://ftp.cmegroup.com/pub/settle/stlags'
 equity_address = 'ftp://ftp.cmegroup.com/pub/settle/stleqt'
@@ -39,6 +40,7 @@ nymex_futures_csv_address = 'ftp://ftp.cmegroup.com/pub/settle/nymex_future.csv'
 nymex_options_csv_address = 'ftp://ftp.cmegroup.com/pub/settle/nymex_option.csv'
 
 folder_date = cu.get_doubledate()
+#folder_date = exp.doubledate_shift_bus_days()
 
 options_data_dir = dn.get_dated_directory_extension(folder_date=folder_date, ext='raw_options_data')
 
@@ -154,7 +156,7 @@ except Exception:
 try:
     log.info('generate early pnl report')
     rpf.generate_portfolio_pnl_report(as_of_date=folder_date, con=con, name='early')
-    er.send_hrsn_early_report(report_date=folder_date)
+    er.send_pnl_early_report(report_date=folder_date)
 except Exception:
     log.error('generate early pnl report', exc_info=True)
     pass

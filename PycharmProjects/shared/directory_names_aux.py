@@ -4,13 +4,14 @@ import os
 root_home = r'C:\Users\kocat_000\quantFinance'
 root_work = r'C:\Research'
 root_quantgo = r'D:\Research'
-root_work_dropbox = r'C:\Users\ekocatulum\Dropbox'
+root_work_dropbox = r'C:\Users\mtulum\Dropbox'
 tt_fill_directory = r'C:\tt\datfiles\Export'
 
 
 extension_dict = {'presaved_futures_data': '/data/futures_data',
                   'book_snapshot_data': '/data/book_snapshot',
                   'config': '/config',
+                  'c#config': '/c#/config',
                   'ib_data': '/ib_data',
                   'drop_box_trading':'/trading',
                   'commitments_of_traders_data': '/data/fundamental_data/cot_data',
@@ -34,6 +35,7 @@ extension_dict = {'presaved_futures_data': '/data/futures_data',
                   'daily': '/daily',
                   'log': '/logs',
                    'man_positions': '/man_positions',
+                   'wh_positions': '/wh_positions',
                   'python_file': '/PycharmProjects'}
 
 

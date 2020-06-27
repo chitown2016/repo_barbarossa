@@ -94,8 +94,6 @@ def get_futures_butterfly_signals(**kwargs):
 
     price_ratio_current = linear_interp_price2_current/price_2
 
-
-
     q = stats.get_quantile_from_number({'x': price_ratio_current, 'y': price_ratio.values, 'clean_num_obs': max(100, round(3*len(price_ratio.values)/4))})
     qf = stats.get_quantile_from_number({'x': price_ratio_current, 'y': price_ratio.values[-40:], 'clean_num_obs': 30})
 
@@ -340,7 +338,7 @@ def get_futures_spread_carry_signals(**kwargs):
                            current_data['c' + str(x+2)]['close_price']
                             for x in range(len(ticker_list)-2)]
 
-    price_current_list = [current_data['c' + str(x+1)]['close_price']-current_data['c' + str(x+2)]['close_price']
+    price_current_list = [round(current_data['c' + str(x+1)]['close_price']-current_data['c' + str(x+2)]['close_price'],8)
                             for x in range(len(ticker_list)-1)]
 
     yield_history = [100*(aligned_data['c' + str(x+1)]['close_price']-

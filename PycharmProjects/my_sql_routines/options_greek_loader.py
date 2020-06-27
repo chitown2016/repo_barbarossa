@@ -20,7 +20,7 @@ def update_options_greek_database_4ticker(**kwargs):
         con = kwargs['con']
 
     ticker = kwargs['ticker']
-    #print(ticker)
+    print(ticker)
 
     option_greeks = osc.cal_greeks_4option_maturity(**kwargs)
 

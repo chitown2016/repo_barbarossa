@@ -10,7 +10,9 @@ import ta.portfolio_manager as tpm
 import shared.calendar_utilities as cu
 
 conversion_from_man_ticker_head = {'06': 'SM',
+                                   '6': 'SM',
                                    '07': 'BO',
+                                   '7': 'BO',
                                    'C-': 'C',
                                    'KW': 'KW',
                                    'S-': 'S',
@@ -57,6 +59,9 @@ def load_and_convert_man_position_file(**kwargs):
     loc_latest_file = time_list.index(max(time_list))
 
     man_frame = pd.read_csv(positions_directory + '/' + file_list[loc_latest_file])
+    man_frame.rename(columns={'Strike': 'strike_price', 'Option Type': 'option_type',
+                              'Net Qty': 'qty','Futures Code': 'Instrument',
+                              'Contract Maturity': 'Prompt'}, inplace=True)
 
     man_frame['ticker_head'] = [conversion_from_man_ticker_head[x] for x in man_frame['Instrument']]
 

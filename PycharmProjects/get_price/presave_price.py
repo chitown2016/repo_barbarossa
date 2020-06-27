@@ -401,13 +401,19 @@ def generate_and_update_futures_data_file_4tickerhead(**kwargs):
     data4_tickerhead = pd.concat(merged_dataframe_list)
 
     if os.path.isfile(presaved_futures_data_folder + '/' + ticker_head + '.pkl'):
-        clean_data = data4_tickerhead[np.isfinite(data4_tickerhead['change_5'])]
+        data4_tickerhead['past_indx'] = [1 if np.isfinite(x) else 0 for x in data4_tickerhead['change_5'].values]
+        clean_data = data4_tickerhead
         clean_data['frame_indx'] = 1
+
+        data_columns = old_data.columns
         old_data['frame_indx'] = 0
-        merged_data = pd.concat([old_data,clean_data],ignore_index=True)
-        merged_data.sort_values(['cont_indx', 'settle_date', 'frame_indx'], ascending=[True, True, False], inplace=True)
-        merged_data.drop_duplicates(subset=['settle_date', 'cont_indx'],keep='first', inplace=True)
-        data4_tickerhead = merged_data.drop('frame_indx', 1, inplace=False)
+        old_data['past_indx'] = [1 if np.isfinite(x) else 0 for x in old_data['change_5'].values]
+        merged_data = pd.concat([old_data, clean_data], ignore_index=True, sort=True)
+        merged_data.sort_values(['cont_indx', 'settle_date', 'past_indx', 'frame_indx'],
+                                ascending=[True, True, False, False], inplace=True)
+        merged_data.drop_duplicates(subset=['settle_date', 'cont_indx'], keep='first', inplace=True)
+        data4_tickerhead = merged_data.drop(['frame_indx', 'past_indx'], 1, inplace=False)
+        data4_tickerhead = data4_tickerhead[data_columns]
 
     data4_tickerhead.to_pickle(presaved_futures_data_folder + '/' + ticker_head + '.pkl')
 

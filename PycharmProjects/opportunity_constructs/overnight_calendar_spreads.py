@@ -82,6 +82,7 @@ def generate_overnight_spreads_sheet_4date(**kwargs):
 
     overnight_calendars['ticker1L'] = [x['ticker1L'] for x in signals_output]
     overnight_calendars['ticker2L'] = [x['ticker2L'] for x in signals_output]
+    overnight_calendars['reward_risk'] = [x['reward_risk'] for x in signals_output]
     overnight_calendars['qCarry'] = [x['q_carry'] for x in signals_output]
     overnight_calendars['butterflyQ'] = [x['butterfly_q'] for x in signals_output]
     overnight_calendars['butterflyZ'] = [x['butterfly_z'] for x in signals_output]

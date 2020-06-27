@@ -54,6 +54,7 @@ def get_overnight_calendar_signals(**kwargs):
 
     ticker1L = ''
     ticker2L = ''
+    reward_risk = np.nan
     q_carry = np.nan
     butterfly_q = np.nan
     butterfly_z = np.nan
@@ -71,6 +72,7 @@ def get_overnight_calendar_signals(**kwargs):
         return {'success': False,
                 'ticker1L': ticker1L,
                 'ticker2L': ticker2L,
+                'reward_risk': reward_risk,
                 'q_carry': q_carry,
                 'butterfly_q': butterfly_q,
                 'butterfly_z': butterfly_z,
@@ -94,6 +96,7 @@ def get_overnight_calendar_signals(**kwargs):
 
     aligned_data = aligned_output['aligned_data']
     current_data = aligned_output['current_data']
+
     aligned_data['spread_change_1'] = aligned_data['c1']['change_1']-aligned_data['c2']['change_1']
     aligned_data['spread_price'] = aligned_data['c1']['close_price']-aligned_data['c2']['close_price']
     spread_price_current = current_data['c1']['close_price']-current_data['c2']['close_price']
@@ -115,6 +118,7 @@ def get_overnight_calendar_signals(**kwargs):
         spread_report = spread_carry_output['spread_report']
         selected_line = spread_report[(spread_report['ticker1']==ticker_list[0])&(spread_report['ticker2']==ticker_list[1])]
         if not selected_line.empty:
+            reward_risk = selected_line['reward_risk'].iloc[0]
             q_carry = selected_line['q_carry'].iloc[0]
             butterfly_q = selected_line['butterfly_q'].iloc[0]
             butterfly_z = selected_line['butterfly_z'].iloc[0]
@@ -133,6 +137,7 @@ def get_overnight_calendar_signals(**kwargs):
     return {'success': True,
             'ticker1L': ticker1L,
             'ticker2L': ticker2L,
+            'reward_risk': reward_risk,
             'q_carry': q_carry,
             'butterfly_q': butterfly_q,
             'butterfly_z': butterfly_z,
