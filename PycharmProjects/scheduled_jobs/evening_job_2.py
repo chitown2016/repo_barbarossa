@@ -5,6 +5,8 @@ with warnings.catch_warnings():
     warnings.filterwarnings("ignore",category=FutureWarning)
     import statsmodels.api
 
+warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
+
 
 import shared.log as lg
 log = lg.get_logger(file_identifier='evening_job_2',log_level='INFO')
@@ -28,6 +30,7 @@ import ta.prepare_daily as prep
 import datetime as dt
 import fundamental_data.cot_data as cot
 import get_price.save_stock_data as ssd
+import my_sql_routines.options_pnl_loader as opnl
 
 commodity_address = 'ftp://ftp.cmegroup.com/pub/settle/stlags'
 equity_address = 'ftp://ftp.cmegroup.com/pub/settle/stleqt'
@@ -123,6 +126,13 @@ try:
     prep.prepare_strategy_daily(strategy_class='scv', report_date=folder_date)
 except Exception:
     log.error('generate_scv_sheet failed', exc_info=True)
+
+try:
+    log.info('update options pnls')
+    opnl.update_options_pnls_4date(con=con, settle_date=folder_date)
+except Exception:
+    log.error('update options pnls failed', exc_info=True)
+    pass
 
 try:
     log.info('save stock list')

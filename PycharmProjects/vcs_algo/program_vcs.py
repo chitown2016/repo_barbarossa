@@ -10,6 +10,7 @@ import option_models.utils as omu
 import signals.options_filters as of
 import vcs_algo.algo as algo
 import shared.calendar_utilities as cu
+import shared.directory_names_aux as dna
 import shared.directory_names as dn
 import shared.utils as su
 import shared.log as lg
@@ -55,7 +56,7 @@ def main():
     vcs_pairs['interest_date2'] = [grfs.get_simple_rate(as_of_date=report_date, date_to=x)['rate_output'] for x in vcs_pairs['expiration_date2']]
     vcs_pairs['exercise_type'] = [cmi.get_option_exercise_type(ticker_head=x) for x in vcs_pairs['tickerHead']]
 
-    admin_dir = dn.get_directory_name(ext='admin')
+    admin_dir = dna.get_directory_name(ext='admin')
     risk_file_out = su.read_text_file(file_name=admin_dir + '/RiskParameter.txt')
     vcs_risk_parameter = 5*2*float(risk_file_out[0])
 

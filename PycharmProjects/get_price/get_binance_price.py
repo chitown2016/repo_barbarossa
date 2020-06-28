@@ -150,7 +150,7 @@ def get_klines(**kwargs):
     candle_frame['close'] = candle_frame['close'].astype('float')
     candle_frame['volume'] = candle_frame['volume'].astype('float')
 
-    candle_frame['openDatetime'] = [dt.datetime.fromtimestamp(x/1000,tz=pytz.UTC) for x in candle_frame['openTime']]
+    candle_frame['openDatetime'] = [dt.datetime.fromtimestamp(x/1000, tz=pytz.UTC) for x in candle_frame['openTime']]
     candle_frame['openDate'] = [x.date() for x in candle_frame['openDatetime']]
     return candle_frame.drop(['ignore'], axis=1, inplace=False)
 
@@ -179,26 +179,27 @@ def get_binance_price_preloaded(**kwargs):
 
         x = x + dt.timedelta(days=1)
 
+    if len(price_frame_list) == 0:
+        return pd.DataFrame()
     merged_data = pd.concat(price_frame_list)
+
+    if len(merged_data.index) == 0:
+        return pd.DataFrame()
+
     merged_data.set_index('openDatetime', drop=True, inplace=True)
 
-    if interval.upper()!='1H':
+    if interval.upper() != '1H':
         data_out = pd.DataFrame()
         data_out['open'] = merged_data['open'].resample('4H').first()
         data_out['close'] = merged_data['close'].resample('4H').last()
         data_out['high'] = merged_data['high'].resample('4H').max()
         data_out['low'] = merged_data['low'].resample('4H').min()
+        data_out['volume'] = merged_data['volume'].resample('4H').sum()
     else:
         data_out = merged_data
 
     return data_out
 
-
-def get_binance_daily_price_preloaded(**kwargs):
-
-    ticker = kwargs['ticker']
-    date_from = kwargs['date_from']
-    date_to = kwargs['date_to']
 
 
 

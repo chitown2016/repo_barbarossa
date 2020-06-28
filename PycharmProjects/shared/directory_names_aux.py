@@ -24,6 +24,7 @@ extension_dict = {'presaved_futures_data': '/data/futures_data',
                   'option_model_test_data': '/data/option_model_tests',
                   'aligned_time_series_output': '/data/alignedTimeSeriesOutputTemp',
                   'ta': '/ta',
+                  'temp': '/temp',
                   'admin': '/admin',
                   'test_data': '/data/test_data',
                   'stock_data': '/data/stock_data',
@@ -45,7 +46,7 @@ def get_directory_name(**kwargs):
 
     ext = kwargs['ext']
 
-    if computer_name in ['601-TREKW71', '601-TREKW72' ,'601-TREKW74', 'PR-ETRADE01']:
+    if computer_name in ['601-TREKW71', '601-TREKW72' ,'601-TREKW74', 'PR-ETRADE01','PR-QUANT']:
         if ext in ['ib_data', 'drop_box_trading']:
             root_dir = root_work_dropbox
         else:

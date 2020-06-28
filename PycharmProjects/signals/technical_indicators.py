@@ -201,6 +201,7 @@ def rsi(**kwargs):
         if i == 0:
             data_frame_input['smg'].iloc[-smoothing_lookback + i] = np.mean(data_frame_input['gains'].iloc[(-smoothing_lookback - period + 1):-smoothing_lookback + 1 + i])
             data_frame_input['sml'].iloc[-smoothing_lookback + i] = np.mean(data_frame_input['losses'].iloc[(-smoothing_lookback - period + 1):-smoothing_lookback + 1 + i])
+
         else:
             data_frame_input['smg'].iloc[-smoothing_lookback + i] = ((period - 1) * data_frame_input['smg'].iloc[-smoothing_lookback - 1 + i] +data_frame_input['gains'].iloc[-smoothing_lookback + i]) / period
             data_frame_input['sml'].iloc[-smoothing_lookback + i] = ((period - 1) * data_frame_input['sml'].iloc[-smoothing_lookback - 1 + i] + data_frame_input['losses'].iloc[-smoothing_lookback + i]) / period
@@ -307,6 +308,25 @@ def get_bollinger_deviation(**kwargs):
     data_frame_input['bollinger_lower_' + str(period)] = data_frame_input['bollinger_mean_' + str(period)] - 2*data_frame_input['bollinger_std_' + str(period)]
 
     return data_frame_input
+
+
+def get_ewma(**kwargs):
+
+    data_frame_input = kwargs['data_frame_input']
+    period = kwargs['period']
+    field_name = kwargs['field_name']
+
+    if len(data_frame_input)<period:
+        data_frame_input['ewma_' + str(period)] = np.nan
+        return data_frame_input
+
+    data_frame_input['aux'] = data_frame_input[field_name].rolling(window=period, center=False).mean()
+    data_frame_input.aux.iloc[period:] = data_frame_input[field_name].iloc[period:]
+    data_frame_input['ewma_' + str(period)] = data_frame_input.aux.ewm(span=period, adjust=False).mean()
+    data_frame_input.drop('aux', axis=1, inplace=True)
+
+    return data_frame_input
+
 
 
 
