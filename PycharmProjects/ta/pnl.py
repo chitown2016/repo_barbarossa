@@ -293,6 +293,7 @@ def get_strategy_pnl(**kwargs):
 
     alias = kwargs['alias']
     con = msu.get_my_sql_connection(**kwargs)
+    #print(alias)
 
     strategy_info = ts.get_strategy_info_from_alias(alias=alias, con=con)
 
@@ -384,7 +385,7 @@ def get_strategy_pnl(**kwargs):
         nan_price_q_list = [x['nan_price_q'] for x in pnl_path]
         good_price_q_list = [not i for i in nan_price_q_list]
 
-        bus_day_after_nan_list = [bus_day_list[x+1] for x in range(len(bus_day_list)-1) if nan_price_q_list[x]]
+        bus_day_after_nan_list = [bus_day_list[x+1] for x in range(len(bus_day_list)-1) if nan_price_q_list[x] and not nan_price_q_list[x+1]]
 
         pnl_path = [pnl_path[x] for x in range(len(pnl_path)) if good_price_q_list[x]]
         bus_day_list = [bus_day_list[x] for x in range(len(bus_day_list)) if good_price_q_list[x]]

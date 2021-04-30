@@ -22,21 +22,17 @@ def generate_db_strategy_from_strategy_sheet(**kwargs):
 
     strategy_output = load_strategy_file(**kwargs)
 
-    del strategy_output['z5']
-    del strategy_output['z6']
-    del strategy_output['z7']
-
     strategy = strategy_output.loc[id]
 
     if strategy_class == 'futures_butterfly':
-        if strategy['Q'] <= 49:
+        if strategy['QF'] <= 49:
             strategy_alias = strategy['tickerHead'] + strategy['ticker1'][-5:] + strategy['ticker2'][-5:] + \
                              strategy['ticker2'][-5:] + strategy['ticker3'][-5:]
-        elif strategy['Q'] >= 51:
+        elif strategy['QF'] >= 51:
             strategy_alias = strategy['tickerHead'] + strategy['ticker2'][-5:] + strategy['ticker3'][-5:] + \
                        strategy['ticker1'][-5:] + strategy['ticker2'][-5:]
 
-        strategy = strategy[['ticker1','ticker2','ticker3','trDte1','trDte2','trDte3','agg','cBack','Q','QF','z1']]
+        strategy = strategy[['ticker1','ticker2','ticker3','trDte1','trDte2','trDte3','agg','cBack','QF','z1','rr','second_contract_weight']]
 
     description_string = 'strategy_class=' + strategy_class + '&' + \
                           conv.convert_from_dictionary_to_string(dictionary_input=strategy)

@@ -60,9 +60,7 @@ def get_results_4strategy(**kwargs):
     if strategy_class == 'futures_butterfly':
 
         ticker_head = cmi.get_contract_specs(strategy_info_dict['ticker1'])['ticker_head']
-        if not strategy_position.empty:
-            total_contracts2trade = strategy_position['qty'].abs().sum()
-            t_cost = cmi.t_cost[ticker_head]
+
         QF_initial = float(strategy_info_dict['QF'])
         z1_initial = float(strategy_info_dict['z1'])
 
@@ -81,24 +79,20 @@ def get_results_4strategy(**kwargs):
             QF = bf_signals_output['qf']
             z1 = bf_signals_output['zscore1']
             short_tr_dte = current_data['c1']['tr_dte']
-            second_spread_weight = bf_signals_output['second_spread_weight_1']
+            second_spread_weight = bf_signals_output['second_spread_weight']
 
             if strategy_position.empty:
                 recommendation = 'CLOSE'
             elif (z1_initial>0)&(holding_tr_dte > 5) &\
-                    (bf_signals_output['qf']<QF_initial-20)&\
-                    (pnl_frame['total_pnl'].iloc[0] > 3*t_cost*total_contracts2trade):
-                recommendation = 'STOP'
+                    (bf_signals_output['qf']<QF_initial-20):
+                recommendation = 'STOP, target reached'
             elif (z1_initial<0)&(holding_tr_dte > 5) &\
-                    (bf_signals_output['qf']>QF_initial+20)&\
-                    (pnl_frame['total_pnl'].iloc[0] > 3*t_cost*total_contracts2trade):
-                recommendation = 'STOP'
-            elif (current_data['c1']['tr_dte'] < 35)&\
-                (pnl_frame['total_pnl'].iloc[0] > 3*t_cost*total_contracts2trade):
-                recommendation = 'STOP'
-            elif (current_data['c1']['tr_dte'] < 35)&\
-                (pnl_frame['total_pnl'].iloc[0] < 3*t_cost*total_contracts2trade):
-                recommendation = 'WINDDOWN'
+                    (bf_signals_output['qf']>QF_initial+20):
+                recommendation = 'STOP, target reached'
+            elif current_data['c1']['tr_dte'] < 35:
+                recommendation = 'STOP, close to expiration'
+            elif holding_tr_dte > 20:
+                recommendation = 'STOP, not working out'
             else:
                 recommendation = 'HOLD'
         else:

@@ -24,13 +24,17 @@ def get_backtesting_dates(**kwargs):
     trading_calendar = exp.get_calendar_4ticker_head('CL')
     bday_us = CustomBusinessDay(calendar=trading_calendar)
 
-    dts = pd.date_range(start=cu.convert_doubledate_2datetime(date_from),
+    dts_all = pd.date_range(start=cu.convert_doubledate_2datetime(date_from),
                     end=cu.convert_doubledate_2datetime(date_to), freq=bday_us)
 
-    dts = dts[dts.dayofweek==day_of_week]
+    dts = dts_all[dts_all.dayofweek==day_of_week]
+    double_dts_all = [int(x.strftime('%Y%m%d')) for x in dts_all]
+
+    double_dts = [double_dts_all[x] for x in range(len(double_dts_all)) if dts_all[x].dayofweek==day_of_week]
 
     return {'date_time_dates': dts,
-            'double_dates': [int(x.strftime('%Y%m%d')) for x in dts]}
+            'double_dates': double_dts,
+            'double_dates_all': double_dts_all}
 
 def find_exit_point(**kwargs):
 

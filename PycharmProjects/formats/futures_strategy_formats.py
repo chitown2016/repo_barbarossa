@@ -26,22 +26,22 @@ def generate_futures_butterfly_formatted_output(**kwargs):
     butterfly_output = fb.generate_futures_butterfly_sheet_4date(date_to=report_date)
     butterflies = butterfly_output['butterflies']
 
-    filter_out = ff.get_futures_butterfly_filters(data_frame_input=butterflies, filter_list=['long7', 'short7'])
+    filter_out = ff.get_futures_butterfly_filters(data_frame_input=butterflies, filter_list=['long1', 'short1'])
     good_butterflies = filter_out['selected_frame']
 
-    good_butterflies = good_butterflies[(good_butterflies['second_spread_weight_1'] <= 2.5) & (good_butterflies['second_spread_weight_1'] >= 0.4)]
+    good_butterflies = good_butterflies[(good_butterflies['second_spread_weight'] <= 2) & (good_butterflies['second_spread_weight'] >= 0.66)]
 
     butterflies_w_selected_columns = butterflies[['ticker1', 'ticker2', 'ticker3',
                                                   'tickerHead', 'trDte1', 'trDte2', 'trDte3',
-                                                  'Q', 'QF', 'z1', 'z2','z3','z4', 'theo_pnl', 'r1', 'r2', 'bf_price',
-                                                  'RC', 'seasonality','second_spread_weight_1', 'upside', 'downside',
-                                                  'recent_vol_ratio', 'recent_5day_pnl', 'bf_sell_limit', 'bf_buy_limit']]
+                                                  'z1', 'QF', 'rr', 'bf_price',
+                                                  'bfw_price','second_spread_weight', 'upside', 'downside',
+                                                   'recent_5day_pnl']]
 
     good_butterflies_w_selected_columns = good_butterflies[['ticker1', 'ticker2', 'ticker3',
                                                   'tickerHead', 'trDte1', 'trDte2', 'trDte3',
-                                                  'Q', 'QF', 'z1', 'z2','z3','z4', 'theo_pnl', 'r1', 'r2', 'bf_price',
-                                                  'RC', 'seasonality', 'second_spread_weight_1', 'upside', 'downside',
-                                                  'recent_vol_ratio', 'recent_5day_pnl', 'bf_sell_limit', 'bf_buy_limit']]
+                                                  'z1', 'QF', 'rr', 'bf_price',
+                                                  'bfw_price','second_spread_weight', 'upside', 'downside',
+                                                   'recent_5day_pnl']]
 
     writer = pd.ExcelWriter(output_dir + '/' + futil.xls_file_names['futures_butterfly'] + '.xlsx', engine='xlsxwriter')
 

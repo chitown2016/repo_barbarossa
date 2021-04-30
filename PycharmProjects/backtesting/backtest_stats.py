@@ -6,6 +6,7 @@ import shared.statistics as stats
 import shared.utils as su
 import signals.utils as sigut
 import scipy.stats as scs
+from collections import OrderedDict
 
 
 def get_summary_stats(pnl_series):
@@ -80,9 +81,9 @@ def get_indicator_rr_table(**kwargs):
     else:
         indicator_ulimit = np.append(np.NAN,bucket_limits)
 
-    return pd.DataFrame.from_items([('indicator_ulimit', indicator_ulimit),
-                         ('mean_pnl', mean_pnl_list),
-                         ('reward_risk',reward_risk_list)])
+    return pd.DataFrame.from_dict(OrderedDict([('indicator_ulimit', indicator_ulimit),
+                 ('mean_pnl', mean_pnl_list),
+                 ('reward_risk',reward_risk_list)]))
 
 
 def get_indicator_rr_double_table(**kwargs):
@@ -152,10 +153,12 @@ def get_indicator_rr_double_table(**kwargs):
             mean_pnl_list.append(stats_output['mean_pnl'])
             reward_risk_list.append(stats_output['reward_risk'])
 
-    return pd.DataFrame.from_items([('indicator1_ulimit', bucket_limits1_full),
-                                 ('indicator2_ulimit', bucket_limits2_full),
-                                  ('mean_pnl', mean_pnl_list),
-                                 ('reward_risk',reward_risk_list)])
+
+
+    return pd.DataFrame.from_dict(OrderedDict([('indicator1_ulimit', bucket_limits1_full),
+                 ('indicator2_ulimit', bucket_limits2_full),
+                 ('mean_pnl', mean_pnl_list),
+                 ('reward_risk',reward_risk_list)]))
 
 
 def get_indicator_ranking(**kwargs):
@@ -190,8 +193,8 @@ def get_indicator_ranking(**kwargs):
     long_ranking = np.array(long_rr_list).argsort().argsort()
     short_ranking = np.array(short_rr_list).argsort().argsort()
 
-    return pd.DataFrame.from_items([('indicator',indicator_list ),
-                                    ('ranking', long_ranking+short_ranking)])
+    return pd.DataFrame.from_dict(OrderedDict([('indicator',indicator_list ),
+                                        ('ranking', long_ranking+short_ranking)]))
 
 
 def rank_indicators(**kwargs):
@@ -225,7 +228,7 @@ def rank_indicators(**kwargs):
                                                     long_pnl_field=long_pnl_field,
                                                          short_pnl_field=short_pnl_field,
                                                     strategy_class=strategy_class)
-    indicator_ranking_total.sort('ranking',ascending=False,inplace=True)
+    indicator_ranking_total.sort_values(by='ranking',ascending=False,inplace=True)
 
     if granular_ranking_type == 'ticker_head':
         ticker_head_list = list(trade_data['tickerHead'].unique())
@@ -243,8 +246,8 @@ def rank_indicators(**kwargs):
 
         granular_ranking_sums = pd.DataFrame(ranking_list).sum()
 
-        granular_ranking_frame = pd.DataFrame.from_items([('indicator', indicator_list),
-                             ('ranking', granular_ranking_sums)])
+        granular_ranking_frame = pd.DataFrame.from_dict(OrderedDict([('indicator', indicator_list),
+                                            ('ranking', granular_ranking_sums)]))
 
     elif granular_ranking_type == 'ticker_class':
 
@@ -268,7 +271,7 @@ def rank_indicators(**kwargs):
                              ('ranking', granular_ranking_sums)])
 
     return {'indicator_ranking_total': indicator_ranking_total,
-            'indicator_ranking_granular_total': granular_ranking_frame.sort('ranking', ascending=False,inplace=False)}
+            'indicator_ranking_granular_total': granular_ranking_frame.sort_values(by='ranking', ascending=False,inplace=False)}
 
 
 def get_chisquare_independence_results(**kwargs):

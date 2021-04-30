@@ -19,7 +19,7 @@ def get_fm_signals(**kwargs):
     ticker_head = kwargs['ticker_head']
     date_to = kwargs['date_to']
 
-    #print(ticker_head)
+    print(ticker_head)
 
     ticker_class = cmi.ticker_class[ticker_head]
 
@@ -34,28 +34,17 @@ def get_fm_signals(**kwargs):
     data4day = data4day[data4day['tr_dte']>=20]
 
     if len(data4day.index)<2:
-        return {'ticker': '', 'comm_net': np.nan, 'spec_net': np.nan,
-            'comm_cot_index_slow': np.nan, 'comm_cot_index_fast': np.nan,
-            'comm_net_d': np.nan, 'spec_net_d': np.nan,
-            'trend_direction': np.nan,'curve_slope': np.nan,
-            'rsi_3': np.nan, 'rsi_7': np.nan, 'rsi_14': np.nan,'rsi_14_d': np.nan,
-            'macd_histogram_q': np.nan,
-            'macd_histogram_d': np.nan,
-            'bollinger_dev': np.nan,
-            'change1': np.nan,
-            'change1_instant': np.nan,
-            'change5': np.nan,
-            'change10': np.nan,
-            'change20': np.nan,
-            'change1_dollar': np.nan,
-            'change1_instant_dollar': np.nan,
-            'change5_dollar': np.nan,
-            'change10_dollar': np.nan,
-            'change20_dollar': np.nan,
-            'long_outcome1': np.nan,
-            'short_outcome1': np.nan,
-            'long_outcome2': np.nan,
-            'short_outcome2': np.nan}
+        return {'ticker': '',
+                'tickerHead': ticker_head,
+                'comm_indx_156': np.nan,
+                'spec_indx_156': np.nan,
+                'small_indx_156': np.nan,
+                'willco': np.nan,
+                'notes': '',
+                'technicalNotes': '',
+                's_oi': np.nan, 'trend_direction': np.nan, 'curve_slope': np.nan}
+
+
 
     data4day.sort_values('volume', ascending=False, inplace=True)
     data4day = data4day.iloc[:2]
@@ -137,133 +126,76 @@ def get_fm_signals(**kwargs):
     forward_data = co.calculate_volatility_based_outcomes(data_frame_input=forward_data[:21], volatility_field='atr_14', calculate_first_row_onlyQ=True)
 
     ticker_data = ticker_data[ticker_data['settle_date']<=datetime_to]
-    ticker_data = ti.rsi(data_frame_input=ticker_data, change_field='change_1', period=3)
-    ticker_data = ti.rsi(data_frame_input=ticker_data, change_field='change_1', period=7)
-    ticker_data = ti.rsi(data_frame_input=ticker_data, change_field='change_1', period=14)
 
-    ticker_data = ti.get_macd(data_frame_input=ticker_data, period1=12, period2=26, period3=9)
-    macd_histogram_q = stats.get_quantile_from_number({'x': ticker_data['macd_hist_12_26_9'].iloc[-1], 'y': ticker_data['macd_hist_12_26_9']})
+    ticker_data = ti.stochastic(data_frame_input=ticker_data, p1=7, p2=4, p3=10)
 
-    ticker_data = ti.get_bollinger_deviation(data_frame_input=ticker_data,period=20)
+    technical_note_list = []
 
-    cot_output = cot.get_cot_data(ticker_head=ticker_head, date_to=date_to)
+    if (ticker_data['D2'].iloc[-1]>ticker_data['D2'].iloc[-2]) and (ticker_data['D2'].iloc[-2]>ticker_data['D2'].iloc[-3]) and (ticker_data['D2'].iloc[-3]>ticker_data['D2'].iloc[-4]) and\
+        (ticker_data['D1'].iloc[-1] < ticker_data['D1'].iloc[-2]) and (ticker_data['D1'].iloc[-2] < ticker_data['D1'].iloc[-3]) and (ticker_data['D1'].iloc[-3] < ticker_data['D1'].iloc[-4]):
+        technical_note_list.append('bullish anti')
+    elif (ticker_data['D2'].iloc[-1]<ticker_data['D2'].iloc[-2]) and (ticker_data['D2'].iloc[-2]<ticker_data['D2'].iloc[-3]) and (ticker_data['D2'].iloc[-3]<ticker_data['D2'].iloc[-4]) and\
+        (ticker_data['D1'].iloc[-1] > ticker_data['D1'].iloc[-2]) and (ticker_data['D1'].iloc[-2] > ticker_data['D1'].iloc[-3]) and (ticker_data['D1'].iloc[-3] > ticker_data['D1'].iloc[-4]):
+        technical_note_list.append('bearish anti')
+
+
+
+    cot_output = cot.get_cot_signals(ticker_head=ticker_head, date_to=date_to)
+
+
 
     daily_noise = np.std(ticker_data['change_1'].iloc[-60:])
+    note_list = []
 
     if len(cot_output.index)>0:
 
-        if ticker_class in ['FX','STIR','Index','Treasury']:
+        comm_indx_156 = cot_output['comm_indx_156'].iloc[-1]
+        spec_indx_156 = cot_output['spec_indx_156'].iloc[-1]
+        small_indx_156 = cot_output['small_indx_156'].iloc[-1]
+        willco = cot_output['willco'].iloc[-1]
+        s_oi = cot_output['s_oi'].iloc[-1]
 
-            cot_output['comm_long'] = cot_output['Asset Manager Longs']+cot_output['Dealer Longs']
-            cot_output['comm_short'] = cot_output['Asset Manager Shorts']+cot_output['Dealer Shorts']
-            cot_output['comm_net'] = cot_output['comm_long']-cot_output['comm_short']
 
-            cot_output['spec_long'] = cot_output['Leveraged Funds Longs']
-            cot_output['spec_short'] = cot_output['Leveraged Funds Shorts']
-            cot_output['spec_net'] = cot_output['spec_long']-cot_output['spec_short']
+        if (trend_direction>0) and willco > 80:
+            note_list.append('bullish retracement')
+        elif (trend_direction<0) and willco < 20:
+            note_list.append('bearish retracement')
 
-        else:
-            cot_output['comm_long'] = cot_output['Producer/Merchant/Processor/User Longs']+cot_output['Swap Dealer Longs']
-            cot_output['comm_short'] = cot_output['Producer/Merchant/Processor/User Shorts']+cot_output['Swap Dealer Shorts']
-            cot_output['comm_net'] = cot_output['comm_long']-cot_output['comm_short']
-            cot_output['spec_long'] = cot_output['Money Manager Longs']+cot_output['Other Reportable Longs']
-            cot_output['spec_short'] = cot_output['Money Manager Shorts']+cot_output['Other Reportable Shorts']
-            cot_output['spec_net'] = cot_output['spec_long']-cot_output['spec_short']
+        if comm_indx_156 > 80:
+            note_list.append('bullish trend reversal')
+        elif comm_indx_156 < 20:
+            note_list.append('bearish trend reversal')
 
-        if (datetime_to-cot_output['settle_date'].iloc[-1]).days>=10:
-            comm_net = np.nan
-            spec_net = np.nan
-        else:
-            comm_net = cot_output['comm_net'].iloc[-1]
-            spec_net = cot_output['spec_net'].iloc[-1]
+        if (spec_indx_156<20) and (small_indx_156<20):
+            note_list.append('bullish extreme positioning')
+        elif (spec_indx_156>80) and (small_indx_156>80):
+            note_list.append('bearish extreme positioning')
 
-        comm_net_d = np.sign(comm_net-cot_output['comm_net'].iloc[-3])
-        spec_net_d = np.sign(spec_net-cot_output['spec_net'].iloc[-3])
+        if s_oi<10:
+            note_list.append('bullish lack of interest')
+        elif s_oi>90:
+            note_list.append('bearish too much interest')
 
-        comm_net_min_slow = cot_output['comm_net'].iloc[-156:].min()
-        comm_net_max_slow = cot_output['comm_net'].iloc[-156:].max()
-
-        comm_cot_index_slow = 100*(comm_net-comm_net_min_slow)/(comm_net_max_slow-comm_net_min_slow)
-
-        comm_net_min_fast = cot_output['comm_net'].iloc[-52:].min()
-        comm_net_max_fast = cot_output['comm_net'].iloc[-52:].max()
-
-        comm_cot_index_fast = 100*(comm_net-comm_net_min_fast)/(comm_net_max_fast-comm_net_min_fast)
 
     else:
-        comm_net = np.nan
-        spec_net = np.nan
-        comm_cot_index_slow = np.nan
-        comm_cot_index_fast = np.nan
-        comm_net_d = np.nan
-        spec_net_d = np.nan
+        comm_indx_156 = np.nan
+        spec_indx_156 = np.nan
+        small_indx_156 = np.nan
+        willco = np.nan
+        s_oi = np.nan
 
     contract_multiplier = cmi.contract_multiplier[ticker_head]
-    print(ticker_head)
+   #print(ticker_head)
 
-    return {'ticker': ticker2, 'comm_net': comm_net, 'spec_net': spec_net,
-            'comm_net_d': comm_net_d,
-            'spec_net_d': spec_net_d,
-            'comm_cot_index_slow': comm_cot_index_slow, 'comm_cot_index_fast': comm_cot_index_fast, 'trend_direction': trend_direction,'curve_slope': curve_slope,
-            'rsi_3': ticker_data['rsi_3'].iloc[-1], 'rsi_7': ticker_data['rsi_7'].iloc[-1], 'rsi_14': ticker_data['rsi_14'].iloc[-1],
-            'rsi_14_d': np.sign(ticker_data['rsi_14'].iloc[-1]-ticker_data['rsi_14'].iloc[-3]),
-            'macd_histogram_q':macd_histogram_q,
-            'macd_histogram_d': np.sign(ticker_data['macd_hist_12_26_9'].iloc[-1]-ticker_data['macd_hist_12_26_9'].iloc[-3]),
-            'bollinger_dev': ticker_data['bollinger_dev_20'].iloc[-1],
-            'change1': ticker_data['change1'].iloc[-1]/daily_noise,
-            'change1_instant': ticker_data['change1_instant'].iloc[-1]/daily_noise,
-            'change5': ticker_data['change5'].iloc[-1]/daily_noise,
-            'change10': ticker_data['change10'].iloc[-1]/daily_noise,
-            'change20': ticker_data['change20'].iloc[-1]/daily_noise,
-            'change1_dollar': ticker_data['change1'].iloc[-1]*contract_multiplier,
-            'change1_instant_dollar': ticker_data['change1_instant'].iloc[-1]*contract_multiplier,
-            'change5_dollar': ticker_data['change5'].iloc[-1]*contract_multiplier,
-            'change10_dollar': ticker_data['change10'].iloc[-1]*contract_multiplier,
-            'change20_dollar': ticker_data['change20'].iloc[-1]*contract_multiplier,
-            'long_outcome1': forward_data['long_outcome1'].iloc[0],
-            'short_outcome1': forward_data['short_outcome1'].iloc[0],
-            'long_outcome2': forward_data['long_outcome2'].iloc[0],
-            'short_outcome2': forward_data['short_outcome2'].iloc[0]}
-
-def get_cot_strategy_signals(**kwargs):
-
-    ticker_head = kwargs['ticker_head']
-    date_to = kwargs['date_to']
-
-    datetime_to = cu.convert_doubledate_2datetime(date_to)
-
-    data_out = gfp.get_futures_price_preloaded(ticker_head=ticker_head)
-    data_out = data_out[data_out['settle_date'] <= datetime_to]
-
-    data_out_front = data_out[data_out['tr_dte'] <= 60]
-    data_out_front.drop_duplicates(subset=['settle_date'], keep='last', inplace=True)
-
-    data_out_back = data_out[data_out['tr_dte'] > 60]
-    data_out_back.drop_duplicates(subset=['settle_date'], keep='last', inplace=True)
-
-    merged_data = pd.merge(data_out_front[['settle_date','tr_dte','close_price']],data_out_back[['tr_dte','close_price','settle_date','ticker','change_1']],how='inner',on='settle_date')
-    merged_data['const_mat']=((merged_data['tr_dte_y']-60)*merged_data['close_price_x']+
-                              (60-merged_data['tr_dte_x'])*merged_data['close_price_y'])/\
-                             (merged_data['tr_dte_y']-merged_data['tr_dte_x'])
-
-    cot_output = cot.get_cot_data(ticker_head=ticker_head,date_to=date_to)
-
-    cot_output['comm_net'] = cot_output['Commercial Long']-cot_output['Commercial Short']
-    cot_output['spec_net'] = cot_output['Noncommercial Long'] - cot_output['Noncommercial Short']
-
-    cot_output['comm_min'] = cot_output['comm_net'].rolling(window=156, min_periods=156, center=False).min()
-    cot_output['comm_max'] = cot_output['comm_net'].rolling(window=156, min_periods=156, center=False).max()
-    cot_output['cot_index_slow'] = 100 * (cot_output['comm_net'] - cot_output['comm_min']) / (
-                cot_output['comm_max'] - cot_output['comm_min'])
-
-    cot_output['settle_date'] = [x+dt.timedelta(days=3) for x in cot_output['settle_date']]
-
-    combined_data = pd.merge(merged_data,cot_output,how='inner',on='settle_date')
-
-    return {'ticker_head':ticker_head,
-            'success': True, 'cot_index_slow': cot_output['cot_index_slow'].iloc[-1],
-            'combined_data': combined_data,}
-
+    return {'ticker': ticker2,
+            'tickerHead': ticker_head,
+            'comm_indx_156': comm_indx_156,
+            'spec_indx_156': spec_indx_156,
+            'small_indx_156': small_indx_156,
+            'willco': willco,
+            'notes': ','.join([str(x) for x in note_list]),
+            'technicalNotes': ','.join([str(x) for x in technical_note_list]),
+            's_oi': s_oi, 'trend_direction': trend_direction,'curve_slope': curve_slope}
 
 def get_contract_summary_stats(**kwargs):
     ticker = kwargs['ticker']

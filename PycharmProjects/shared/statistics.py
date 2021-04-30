@@ -135,7 +135,8 @@ def get_regression_results(regression_input):
             'conf_int': results.conf_int(),
             'rsquared': 100*results.rsquared,
             'residualstd': np.sqrt(results.mse_resid),
-            'zscore': zscore}
+            'zscore': zscore,
+            'results':results}
 
 def get_pca(**kwargs):
 

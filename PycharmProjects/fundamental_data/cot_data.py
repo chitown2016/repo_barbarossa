@@ -22,6 +22,7 @@ db_2_quandl_dictionary = {'GC': '088691',
                           'US': '020601',
                           'ED': '132741',
                           'ES': '13874A',
+                          'SP': '138741',
                           'NQ': '209742',
                           'CL': '067651',
                           'HO': '022651',
@@ -82,6 +83,7 @@ def presave_cot_data():
 
     tickerhead_list = list(set(cmi.futures_butterfly_strategy_tickerhead_list + cmi.cme_futures_tickerhead_list))
     tickerhead_list.remove('B')
+    tickerhead_list.append('SP')
     [presave_cot_data_4ticker_head(ticker_head=x) for x in tickerhead_list]
 
 
@@ -98,5 +100,69 @@ def get_cot_data(**kwargs):
     else:
         data_out = pd.DataFrame()
     return data_out
+
+def get_cot_signals(**kwargs):
+
+    ticker_head = kwargs['ticker_head']
+    kwargs2 = {'date_to': kwargs['date_to']}
+
+    if ticker_head=='ES':
+        kwargs2['ticker_head'] = 'ES'
+        es_data = get_cot_data(**kwargs2)
+        kwargs2['ticker_head'] = 'SP'
+        sp_data = get_cot_data(**kwargs2)
+        final_data = pd.merge(es_data, sp_data, left_on='settle_date', right_on='settle_date', how='inner')
+        final_data['Noncommercial Long'] = final_data['Noncommercial Long_x'] + 5*final_data['Noncommercial Long_y']
+        final_data['Noncommercial Short'] = final_data['Noncommercial Short_x'] + 5*final_data['Noncommercial Short_y']
+        final_data['Commercial Long'] = final_data['Commercial Long_x'] + 5*final_data['Commercial Long_y']
+        final_data['Commercial Short'] = final_data['Commercial Short_x'] + 5*final_data['Commercial Short_y']
+        final_data['Nonreportable Positions Long'] = final_data['Nonreportable Positions Long_x'] + 5 * final_data['Nonreportable Positions Long_y']
+        final_data['Nonreportable Positions Short'] = final_data['Nonreportable Positions Short_x'] + 5 * final_data['Nonreportable Positions Short_y']
+        final_data['Open Interest'] = final_data['Open Interest_x'] + 5 * final_data['Open Interest_y']
+    else:
+        final_data = get_cot_data(**kwargs)
+
+    final_data['comm_net'] = final_data['Commercial Long'] - final_data['Commercial Short']
+    final_data['spec_net'] = final_data['Noncommercial Long'] - final_data['Noncommercial Short']
+    final_data['small_net'] = final_data['Nonreportable Positions Long'] - final_data['Nonreportable Positions Short']
+    final_data['oi'] = final_data['Open Interest']
+
+    final_data['comm_net_oi'] = final_data['comm_net']/final_data['oi']
+    final_data['h_comm_net_oi'] = final_data['comm_net_oi'].rolling(26, min_periods=20).max()
+    final_data['l_comm_net_oi'] = final_data['comm_net_oi'].rolling(26, min_periods=20).min()
+    final_data['willco'] = 100 * (final_data['comm_net_oi'] - final_data['l_comm_net_oi']) / (final_data['h_comm_net_oi'] - final_data['l_comm_net_oi'])
+
+
+
+    final_data['h_oi'] = final_data['oi'].rolling(52, min_periods=40).max()
+    final_data['l_oi'] = final_data['oi'].rolling(52, min_periods=40).min()
+    final_data['k_oi'] = 100 * (final_data['oi'] - final_data['l_oi']) / (final_data['h_oi'] - final_data['l_oi'])
+    final_data['s_oi'] = final_data['k_oi'].rolling(3, min_periods=3).mean()
+
+    final_data['comm_min_156'] = final_data['comm_net'].rolling(156,min_periods=130).min()
+    final_data['comm_max_156'] = final_data['comm_net'].rolling(156, min_periods=130).max()
+    final_data['comm_indx_156'] = 100*(final_data['comm_net']-final_data['comm_min_156'])/(final_data['comm_max_156']-final_data['comm_min_156'])
+
+
+
+    final_data['spec_min_156'] = final_data['spec_net'].rolling(156, min_periods=130).min()
+    final_data['spec_max_156'] = final_data['spec_net'].rolling(156, min_periods=130).max()
+    final_data['spec_indx_156'] = 100 * (final_data['spec_net'] - final_data['spec_min_156']) / (
+                final_data['spec_max_156'] - final_data['spec_min_156'])
+
+
+    final_data['small_min_156'] = final_data['small_net'].rolling(156, min_periods=130).min()
+    final_data['small_max_156'] = final_data['small_net'].rolling(156, min_periods=130).max()
+    final_data['small_indx_156'] = 100 * (final_data['small_net'] - final_data['small_min_156']) / (
+                final_data['small_max_156'] - final_data['small_min_156'])
+
+    if 'date_from' in kwargs.keys():
+        final_data = final_data[final_data['settle_date'] >= cu.convert_doubledate_2datetime(kwargs['date_from'])]
+
+    return final_data
+
+
+
+
 
 

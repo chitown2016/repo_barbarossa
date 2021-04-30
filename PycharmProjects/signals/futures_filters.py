@@ -12,69 +12,17 @@ def get_futures_butterfly_filters(**kwargs):
     selection_indx = [False]*len(data_frame_input.index)
 
     if 'long1' in filter_list:
-        selection_indx = selection_indx|((data_frame_input['z1'] <= -1.2) & (data_frame_input['QF'] <= 12))
+        selection_indx = selection_indx & (data_frame_input['second_spread_weight'] > 0.66) & (data_frame_input['second_spread_weight'] < 2)&(data_frame_input['trDte1']>=65)
+        selection_indx = selection_indx|((data_frame_input['tickerHead'].isin(['CL', 'B'])) & (data_frame_input['z2'] <= -0.6) &(data_frame_input['z1'] <= -0.28) & (data_frame_input['QF'] <= 13)&(data_frame_input['rr'] >0.2))
+        selection_indx = selection_indx|((np.logical_not(data_frame_input['tickerHead'].isin(['CL', 'B']))) &(data_frame_input['z1'] <= -0.28) & (data_frame_input['QF'] <= 13)&(data_frame_input['rr'] >0.2))
 
     if 'short1' in filter_list:
-        selection_indx = selection_indx|((data_frame_input['z1'] >= 0.6) & (data_frame_input['QF'] >= 85))
-
-    if 'long2' in filter_list:
-        selection_indx = selection_indx|((data_frame_input['z1'] <= -0.6) & (data_frame_input['QF'] <= 12))
-
-    if 'short2' in filter_list:
-        selection_indx = selection_indx|((data_frame_input['z1'] >= 0.6) & (data_frame_input['QF'] >= 85))
-
-    if 'long3' in filter_list:
-        selection_indx = selection_indx|((data_frame_input['Q'] <= 15) & (data_frame_input['QF'] <= 40) &
-                                         (data_frame_input['recent_5day_pnl'] > 2*data_frame_input['downside']))
-
-    if 'short3' in filter_list:
-        selection_indx = selection_indx|((data_frame_input['Q'] >= 85) & (data_frame_input['QF'] >= 60) &
-                                         (data_frame_input['recent_5day_pnl'] < 2*data_frame_input['upside']))
-
-    if 'long4' in filter_list:
-        selection_indx = selection_indx|((data_frame_input['z1'] <= -1.2) &
-                                         (data_frame_input['QF'] <= 12) &
-                                         (data_frame_input['second_spread_weight_1'] > 0.5) &
-                                         (data_frame_input['second_spread_weight_1'] < 1.5))
-
-    if 'short4' in filter_list:
-        selection_indx = selection_indx|((data_frame_input['z1'] >= 0.6) &
-                                         (data_frame_input['QF'] >= 85) &
-                                         (data_frame_input['second_spread_weight_1'] > 0.5) &
-                                         (data_frame_input['second_spread_weight_1'] < 1.5))
-
-    if 'long5' in filter_list:
-        selection_indx = selection_indx|((data_frame_input['z1'] <= -1.2) &
-                                         (data_frame_input['QF'] <= 12) &
-                                         (data_frame_input['tickerHead'] != 'S') &
-                                         (data_frame_input['tickerHead'] != 'RB'))
-
-    if 'short5' in filter_list:
-        selection_indx = selection_indx|((data_frame_input['z1'] >= 0.6) &
-                                         (data_frame_input['QF'] >= 85) &
-                                           (data_frame_input['tickerHead'] != 'S') &
-                                         (data_frame_input['tickerHead'] != 'RB'))
-
-    if 'long6' in filter_list:
-        selection_indx = selection_indx|((data_frame_input['z1'] <= -1.2) &
-                                         (data_frame_input['QF'] <= 12) &
-                                         (data_frame_input['mean_reversion_signif'] == True))
-
-    if 'short6' in filter_list:
-        selection_indx = selection_indx|((data_frame_input['z1'] >= 0.6) &
-                                         (data_frame_input['QF'] >= 85) &
-                                         (data_frame_input['mean_reversion_signif'] == True))
-
-    if 'long7' in filter_list:
-        selection_indx = selection_indx|((data_frame_input['z1'] <= -1.2) & (data_frame_input['QF'] <= 12) & (data_frame_input['tickerHead'].isin(['CL', 'B'])) & (data_frame_input['z6'] <= -0.6))|\
-                                        ((data_frame_input['z1'] <= -1.2) &(data_frame_input['QF'] <= 12) & (np.logical_not(data_frame_input['tickerHead'].isin(['CL', 'B']))))
-
-    if 'short7' in filter_list:
-        selection_indx = selection_indx|((data_frame_input['z1'] >= 0.6) &(data_frame_input['QF'] >= 85)& (data_frame_input['tickerHead'].isin(['CL', 'B'])) & (data_frame_input['z6'] >= 0.3))|\
-                                        ((data_frame_input['z1'] >= 0.6) &(data_frame_input['QF'] >= 85)& (np.logical_not(data_frame_input['tickerHead'].isin(['CL', 'B']))))
-
+        selection_indx = selection_indx & (data_frame_input['second_spread_weight'] > 0.66) & (data_frame_input['second_spread_weight'] < 2)&(data_frame_input['trDte1']>=65)
+        selection_indx = selection_indx | ((data_frame_input['tickerHead'].isin(['CL', 'B'])) & (data_frame_input['z2'] >= 0.3) & (data_frame_input['z1'] >= 0.38) & (data_frame_input['QF'] >= 85) & (data_frame_input['rr'] > 0.2))
+        selection_indx = selection_indx | ((np.logical_not(data_frame_input['tickerHead'].isin(['CL', 'B']))) & (data_frame_input['z1']>= 0.38) & (data_frame_input['QF'] >= 85) & (data_frame_input['rr'] > 0.2))
 
     return {'selected_frame': data_frame_input[selection_indx],'selection_indx': selection_indx }
+
 
 def get_spread_carry_filters(**kwargs):
 
@@ -93,6 +41,56 @@ def get_spread_carry_filters(**kwargs):
 
         selection_indx = selection_indx|((data_frame_input['reward_risk'] <= -0.06) &
                                          ([x in ['CL','B','ED'] for x in data_frame_input['tickerHead']]))
+
+    if 'long2' in filter_list:
+        selection_indx = selection_indx | ((data_frame_input['q_carry'] >= 19) & (data_frame_input['front_tr_dteL'] >= 25) &
+                                           ([x not in ['CL', 'B', 'ED', 'OJ'] for x in data_frame_input['tickerHead']]))
+
+        selection_indx = selection_indx | ((data_frame_input['q_carry'] >= 19) & (data_frame_input['front_tr_dteL'] >= 25) & (data_frame_input['front_tr_dteL'] <= 190) &
+                    ([x in ['OJ'] for x in data_frame_input['tickerHead']]))
+
+    if 'short2' in filter_list:
+        selection_indx = selection_indx|((data_frame_input['q_carry'] <= -7) & (data_frame_input['front_tr_dteL'] >= 25) &
+                                         ([x not in ['CL','B','ED', 'OJ'] for x in data_frame_input['tickerHead']]))
+
+        selection_indx = selection_indx | ((data_frame_input['q_carry'] <= -7) & (data_frame_input['front_tr_dteL'] >= 25) &
+                                           (data_frame_input['front_tr_dteL'] <= 190) &
+                                           ([x in ['OJ'] for x in data_frame_input['tickerHead']]))
+
+        selection_indx = selection_indx|((data_frame_input['reward_risk'] <= -0.06) & (data_frame_input['front_tr_dteL'] >= 25) &
+                                         ([x in ['CL','B'] for x in data_frame_input['tickerHead']]))
+
+        selection_indx = selection_indx | ((data_frame_input['reward_risk'] <= -0.06) & (data_frame_input['front_tr_dteL'] >= 25) &
+                                           ([x in ['ED'] for x in data_frame_input['tickerHead']]))
+
+        selection_indx = selection_indx | ((data_frame_input['q'] >= 69) & (data_frame_input['front_tr_dteL'] >= 25) &
+                                           ([x in ['ED'] for x in data_frame_input['tickerHead']]))
+
+    if 'long3' in filter_list:
+        selection_indx = selection_indx | ((data_frame_input['q_carry'] >= 19) & (data_frame_input['q1'] <=31) & (data_frame_input['front_tr_dteL'] >= 25) &
+                                           ([x not in ['CL', 'B', 'ED', 'OJ'] for x in data_frame_input['tickerHead']]))
+
+        selection_indx = selection_indx | ((data_frame_input['q_carry'] >= 19) & (data_frame_input['q1'] <=31) & (data_frame_input['front_tr_dteL'] >= 25) &
+                                           (data_frame_input['front_tr_dteL'] <= 190) & ([x in ['OJ'] for x in data_frame_input['tickerHead']]))
+
+    if 'short3' in filter_list:
+        selection_indx = selection_indx|((data_frame_input['q_carry'] <= -7) &
+                                         (data_frame_input['q1'] >= 65) &
+                                         (data_frame_input['front_tr_dteL'] >= 25) &
+                                         ([x not in ['CL','B','ED', 'OJ'] for x in data_frame_input['tickerHead']]))
+
+        selection_indx = selection_indx | ((data_frame_input['q_carry'] <= -7) & (data_frame_input['front_tr_dteL'] >= 25) &
+                                           (data_frame_input['q1'] >= 65) &
+                                           (data_frame_input['front_tr_dteL'] <= 190) &
+                                           ([x in ['OJ'] for x in data_frame_input['tickerHead']]))
+
+        selection_indx = selection_indx|((data_frame_input['reward_risk'] <= -0.11) &
+                                         (data_frame_input['q_carry'] <= -1) &
+                                         (data_frame_input['front_tr_dteL'] >= 25) &
+                                         ([x in ['CL','B'] for x in data_frame_input['tickerHead']]))
+
+        selection_indx = selection_indx | ((data_frame_input['q'] >= 69) & (data_frame_input['front_tr_dteL'] >= 25) &
+                                           ([x in ['ED'] for x in data_frame_input['tickerHead']]))
 
     return {'selected_frame': data_frame_input[selection_indx],'selection_indx': selection_indx }
 

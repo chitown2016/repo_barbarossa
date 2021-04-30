@@ -285,7 +285,7 @@ def get_max_cal_dte(**kwargs):
         else:
             max_cal_dte = 720
     elif ticker_head in ['ES', 'NQ', 'TY', 'US', 'FV', 'TU', 'GC', 'SI']:
-        max_cal_dte = 360
+        max_cal_dte = 540
     elif ticker_head in ['EC', 'JY', 'AD', 'CD', 'BP']:
         max_cal_dte = 720
 

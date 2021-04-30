@@ -83,11 +83,33 @@ def get_butterfly_panel_plot(**kwargs):
                      str(front_contract_year.values[x]) for x in new_index if contract_change_indx[x]]
     x_tick_values.append('X')
 
+    price_1_aligned = aligned_data['c1']['close_price']
+    price_2_aligned = aligned_data['c2']['close_price']
+    price_3_aligned = aligned_data['c3']['close_price']
+
+    spread_1_aligned = price_1_aligned - price_2_aligned
+    spread_2_aligned = price_2_aligned - price_3_aligned
+
+    butterfly_price = spread_1_aligned-spread_2_aligned
+    butterfly_price_weighted = spread_1_aligned - bf_signals_output['second_spread_weight']*spread_2_aligned
+
     plt.figure(figsize=(16, 7))
-    plt.plot(range(len(aligned_data.index)),aligned_data['residuals'])
-    plt.xticks(x_tick_locations,x_tick_values)
+    plt.plot(range(len(aligned_data.index)), butterfly_price,
+             range(len(aligned_data.index)), butterfly_price_weighted)
+    plt.xticks(x_tick_locations, x_tick_values)
     plt.grid()
-    plt.title('Contracts: ' + str(contract_list) + ', weight2: ' + str(bf_signals_output['second_spread_weight_1'].round(2)))
+    plt.legend(['butterfly price','weighted butterfly price'])
+    plt.title(
+        'Contracts: ' + str(contract_list) + ', weight2: ' + str(bf_signals_output['second_spread_weight'].round(2)))
+    plt.show()
+
+    plt.figure(figsize=(16, 7))
+    plt.plot(range(len(aligned_data.index)), spread_1_aligned,
+             range(len(aligned_data.index)), spread_2_aligned)
+    plt.xticks(x_tick_locations, x_tick_values)
+    plt.grid()
+    plt.legend(['spread1 price', 'spread2 price'])
+    plt.title('Contracts: ' + str(contract_list))
     plt.show()
 
     return bf_signals_output
@@ -121,21 +143,35 @@ def get_butterfly_scatter_plot(**kwargs):
                                           date_to=report_date,
                                           contract_multiplier=butterflies['multiplier'][id])
 
-    last5_years_indx = bf_signals_output['last5_years_indx']
+    date5_years_ago = cu.doubledate_shift(report_date, 5 * 365)
+    datetime5_years_ago = cu.convert_doubledate_2datetime(date5_years_ago)
 
-    yield1 = bf_signals_output['yield1']
-    yield2 = bf_signals_output['yield2']
+    aligned_output = bf_signals_output['aligned_output']
+    aligned_data = aligned_output['aligned_data']
+    current_data = aligned_output['current_data']
+    last5_years_indx = aligned_data.index > datetime5_years_ago
 
-    yield1_current = bf_signals_output['yield1_current']
-    yield2_current = bf_signals_output['yield2_current']
+    price_1_aligned = aligned_data['c1']['close_price']
+    price_2_aligned = aligned_data['c2']['close_price']
+    price_3_aligned = aligned_data['c3']['close_price']
 
-    yield1_last5_years = yield1[last5_years_indx]
-    yield2_last5_years = yield2[last5_years_indx]
+    price_1 = current_data['c1']['close_price']
+    price_2 = current_data['c2']['close_price']
+    price_3 = current_data['c3']['close_price']
+
+    spread_1_aligned = price_1_aligned - price_2_aligned
+    spread_2_aligned = price_2_aligned - price_3_aligned
+
+    spread_1 = price_1 - price_2
+    spread_2 = price_2 - price_3
+
+    spread_1_last5_years = spread_1_aligned[last5_years_indx]
+    spread_2_last5_years = spread_2_aligned[last5_years_indx]
 
     plt.figure(figsize=(16,7))
-    plt.scatter(yield2, yield1, color='b')
-    plt.scatter(yield2_last5_years,yield1_last5_years, color='k')
-    plt.scatter(yield2_current, yield1_current, color='r')
+    plt.scatter(spread_2_aligned, spread_1_aligned, color='b')
+    plt.scatter(spread_2_last5_years, spread_1_last5_years, color='k')
+    plt.scatter(spread_2, spread_1, color='r')
     plt.legend(['old', 'recent', 'last'], frameon=False)
     plt.grid()
     plt.show()

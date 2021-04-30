@@ -217,17 +217,34 @@ def rsi(**kwargs):
 def stochastic(**kwargs):
 
     data_frame_input = kwargs['data_frame_input']
+    data_frame_output = data_frame_input.copy(deep=True)
+
     p1 = kwargs['p1']
     p2 = kwargs['p2']
     p3 = kwargs['p3']
 
-    data_frame_input['hh'] = pd.rolling_max(data_frame_input['high'], window=p1, min_periods=p1)
-    data_frame_input['ll'] = pd.rolling_min(data_frame_input['low'], window=p1, min_periods=p1)
-    data_frame_input['K'] = 100*(data_frame_input['close']-data_frame_input['ll'])/(data_frame_input['hh']- data_frame_input['ll'])
-    data_frame_input['D1'] = pd.rolling_mean(data_frame_input['K'], window=p2)
-    data_frame_input['D2'] = pd.rolling_mean(data_frame_input['D1'], window=p3)
 
-    return data_frame_input.drop(['hh','ll'], 1, inplace=False)
+    if 'high_price' in data_frame_input.columns:
+        data_frame_input.rename(columns={'high_price': 'high'}, inplace=True)
+
+    if 'low_price' in data_frame_input.columns:
+        data_frame_input.rename(columns={'low_price': 'low'}, inplace=True)
+
+    if 'close_price' in data_frame_input.columns:
+        data_frame_input.rename(columns={'close_price': 'close'}, inplace=True)
+
+    data_frame_input['hh'] = data_frame_input['high'].rolling(p1, min_periods=p1).max()
+    data_frame_input['ll'] = data_frame_input['low'].rolling(p1, min_periods=p1).min()
+    data_frame_input['K'] = 100*(data_frame_input['close']-data_frame_input['ll'])/(data_frame_input['hh']- data_frame_input['ll'])
+
+    data_frame_input['D1'] = data_frame_input['K'].rolling(p2, min_periods=p2).mean()
+    data_frame_input['D2'] = data_frame_input['D1'].rolling(p3, min_periods=p3).mean()
+
+    data_frame_output['K'] = data_frame_input['K']
+    data_frame_output['D1'] = data_frame_input['D1']
+    data_frame_output['D2'] = data_frame_input['D2']
+
+    return data_frame_output
 
 
 def time_series_regression(**kwargs):

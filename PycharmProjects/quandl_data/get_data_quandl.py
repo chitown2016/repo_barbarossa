@@ -41,6 +41,40 @@ quandl_database = {'LN': 'CME',
                    'US': 'CME',
                    'SI': 'CME'}
 
+quandl_database_new = {'LN': 'SRF/CME',
+                   'LC': 'SRF/CME',
+                   'FC': 'SRF/CME',
+                    'C': 'SRF/CME',
+                    'S': 'SRF/CME',
+                   'SM': 'SRF/CME',
+                   'BO': 'SRF/CME',
+                    'W': 'SRF/CME',
+                   'KW': 'SRF/CME',
+                   'SB': 'SRF/ICE',
+                   'KC': 'SRF/ICE',
+                   'CC': 'SRF/ICE',
+                   'CT': 'SRF/ICE',
+                   'OJ': 'SRF/ICE',
+                   'CL': 'SRF/CME',
+                   'B' : 'SRF/ICE',
+                   'HO': 'SRF/CME',
+                   'RB': 'SRF/CME',
+                   'NG': 'SRF/CME',
+                   'ED': 'SRF/CME',
+                   'BP': 'SRF/CME',
+                   'GC': 'SRF/CME',
+                   'CD': 'SRF/CME',
+                   'ES': 'SRF/CME',
+                   'AD': 'SRF/CME',
+                   'TY': 'SRF/CME',
+                   'TU': 'SRF/CME',
+                   'FV': 'SRF/CME',
+                   'EC': 'SRF/CME',
+                   'JY': 'SRF/CME',
+                   'NQ': 'SRF/CME',
+                   'US': 'SRF/CME',
+                   'SI': 'SRF/CME'}
+
 authtoken = "zwBtPkKDycmg5jmYvK_s"
 
 
@@ -79,6 +113,7 @@ def get_daily_historic_data_quandl(**kwargs):
     ticker = kwargs['ticker']
     quandl_database_4ticker = get_quandl_database_4ticker(ticker)
     kwargs['quandl_ticker'] = quandl_database_4ticker + '/' + ticker
+    #kwargs['quandl_ticker'] = quandl_database_4ticker + '_' + ticker
 
     quandl_out = get_data(**kwargs)
     data_out = quandl_out['data_out']

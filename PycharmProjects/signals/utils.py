@@ -48,6 +48,27 @@ def calc_theo_spread_move_from_ratio_normalization(**kwargs):
 
     return {'ratio_target_list': ratio_target_list, 'theo_spread_move_list': theo_spread_move_list}
 
+def calc_theo_weighted_butterfly_move(**kwargs):
+
+    price_time_series = kwargs['price_time_series']
+    starting_quantile = kwargs['starting_quantile']
+    weighted_butterfly_price = kwargs['weighted_butterfly_price']
+    favorable_quantile_move_list = kwargs['favorable_quantile_move_list']
+
+    price_target_list = [np.NAN] * len(favorable_quantile_move_list)
+
+    if starting_quantile > 50:
+
+        price_target_list = stats.get_number_from_quantile(y=price_time_series,
+                                                       quantile_list=[starting_quantile-x for x in favorable_quantile_move_list])
+    elif starting_quantile < 50:
+
+        price_target_list = stats.get_number_from_quantile(y=price_time_series,
+                                                       quantile_list=[starting_quantile+x for x in favorable_quantile_move_list])
+
+    theo_butterfly_move_list = [x - weighted_butterfly_price for x in price_target_list]
+
+    return {'price_target_list': price_target_list, 'theo_butterfly_move_list': theo_butterfly_move_list}
 
 def calc_spread_move_from_new_ratio(**kwargs):
 
@@ -59,16 +80,16 @@ def get_signal_correlation(**kwargs):
 
     strategy_class = kwargs['strategy_class']
     signal_name = kwargs['signal_name']
-
+    #print(signal_name)
     if strategy_class == 'futures_butterfly':
-        if signal_name in ['Q', 'QF', 'z1', 'z2', 'z3', 'z4']:
+        if signal_name in ['Q', 'QF','QF3','QF4','QF5','QF6', 'z1', 'z2', 'z3', 'z4','z5','z6','z7','z8','z9','z10','z11','z12','z13']:
             correlation = -1
         elif signal_name == 'mom5':
             correlation = 1
     elif strategy_class == 'spread_carry':
-        if signal_name == 'q':
+        if signal_name in ['q', 'q5', 'q1']:
             correlation = -1
-        elif signal_name in ['q_carry','reward_risk'] :
+        elif signal_name in ['q_carry', 'reward_risk']:
             correlation = 1
     elif strategy_class == 'curve_pca':
         if signal_name == 'z':

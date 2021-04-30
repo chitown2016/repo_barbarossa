@@ -31,7 +31,7 @@ max_tr_dte_limits = {'LN': 300,
                      'HO': 300,
                      'RB': 300,
                      'NG': 300,
-                     'ED': 600}
+                     'ED': 750}
 
 
 def get_spread_carry_4tickerhead(**kwargs):
@@ -59,7 +59,11 @@ def get_spread_carry_4tickerhead(**kwargs):
                                            settle_date=report_date,
                                            futures_data_dictionary=futures_data_dictionary)
 
-    daily_data = daily_data[(daily_data['tr_dte'] >= min_tr_dte) & (daily_data['tr_dte'] <= max_tr_dte_limits[ticker_head])]
+    if ticker_head=='ED':
+        daily_data = daily_data[(daily_data['tr_dte'] >= 50) & (daily_data['tr_dte'] <= max_tr_dte_limits[ticker_head])]
+        daily_data = daily_data[daily_data.ticker_month % 3 == 0]
+    else:
+        daily_data = daily_data[(daily_data['tr_dte'] >= min_tr_dte) & (daily_data['tr_dte'] <= max_tr_dte_limits[ticker_head])]
 
     if len(daily_data.index) > 1:
 

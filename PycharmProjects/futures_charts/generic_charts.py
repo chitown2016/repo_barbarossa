@@ -28,7 +28,10 @@ def get_candlestick_chart(**kwargs):
     if 'close_price' in data2plot.columns:
         data2plot.rename(columns={'close_price': 'close'}, inplace=True)
 
-    fig = make_subplots(rows=num_panels, cols=1)
+    if num_panels>1:
+        fig = make_subplots(rows=num_panels, cols=1,row_width=[0.2, 0.4])
+    else:
+        fig = make_subplots(rows=num_panels, cols=1)
     fig.add_trace(go.Candlestick(x=data2plot.index,open=data2plot['open'],
                           high=data2plot['high'],
                           low=data2plot['low'],
@@ -46,6 +49,15 @@ def get_candlestick_chart(**kwargs):
     if 'rsi_14' in data2plot.columns:
         fig.add_trace(go.Scatter(x=data2plot.index,y=data2plot['rsi_14']), row=2, col=1)
         fig.update(layout_xaxis_rangeslider_visible=False)
+
+    if 'indicator_list' in kwargs.keys():
+        indicator_list = kwargs['indicator_list']
+        color_list = ['black', 'purple', 'blue']
+        for i in range(len(indicator_list)):
+            fig.add_trace(go.Scatter(x=data2plot.index, y=data2plot[indicator_list[i]],line=dict(color=color_list[i]),name=indicator_list[i]), row=2, col=1)
+            fig.update(layout_xaxis_rangeslider_visible=False)
+
+    fig['layout'].update(height=900, width=1000, title='Subplots with Shared X-Axes')
     fig.show()
 
 

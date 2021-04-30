@@ -28,12 +28,6 @@ def get_historical_risk_4strategy(**kwargs):
     else:
         as_of_date = exp.doubledate_shift_bus_days()
 
-    if 'datetime5_years_ago' in kwargs.keys():
-        datetime5_years_ago = kwargs['datetime5_years_ago']
-    else:
-        date5_years_ago = cu.doubledate_shift(as_of_date,5*365)
-        datetime5_years_ago = cu.convert_doubledate_2datetime(date5_years_ago)
-
     net_position = ts.get_net_position_4strategy_alias(alias=alias,con=con)
     net_position = net_position[net_position['instrument'] != 'O']
 
@@ -59,15 +53,12 @@ def get_historical_risk_4strategy(**kwargs):
                                     contracts_back=contracts_back,date_to=as_of_date,**kwargs)
     aligned_data = aligned_output['aligned_data']
 
-    last5_years_indx = aligned_data['settle_date'] >= datetime5_years_ago
-    data_last5_years = aligned_data[last5_years_indx]
-
     ticker_head_list = [cmi.get_contract_specs(x)['ticker_head'] for x in net_position['ticker']]
     contract_multiplier_list = [cmi.contract_multiplier[x] for x in ticker_head_list]
 
     pnl_5_change_list = [contract_multiplier_list[x]*
            net_position['qty'].iloc[x]*
-           data_last5_years['c' + str(x+1)]['change_5'] for x in range(len(net_position.index))]
+           aligned_data['c' + str(x+1)]['change_5'] for x in range(len(net_position.index))]
 
     pnl_5_change = sum(pnl_5_change_list)
 
