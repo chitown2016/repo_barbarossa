@@ -4,6 +4,8 @@ import numpy as np
 
 class Strategy:
 
+    variables_2record = ['e_ATR','h','50ewm','200ewm']
+
     @classmethod
     def collect_results4ticker(cls, **kwargs):
 
@@ -22,7 +24,51 @@ class Strategy:
 
         for i in range(data_out['num_length']):
 
-            if cls.check_long_entry_condition(i=i, data_input=data_out) and (current_position == 0):
+            if cls.check_long_exit_condition(i=i, data_input=data_out) and (current_position == 1):
+                current_position = 0
+                exit_price_list.append(cls.get_execution_price(i=i, data_input=data_out, direction=-1,
+                                                               commission_method=cls.comission_method,
+                                                               commission=cls.comission,
+                                                               price_field=cls.execution_price_field))
+                exit_index_list.append(i)
+
+            elif cls.check_short_exit_condition(i=i, data_input=data_out) and (current_position == -1):
+                current_position = 0
+                exit_price_list.append(cls.get_execution_price(i=i, data_input=data_out, direction=1,
+                                                               commission_method=cls.comission_method,
+                                                               commission=cls.comission,
+                                                               price_field=cls.execution_price_field))
+                exit_index_list.append(i)
+
+            elif cls.check_long_target_exit_condition(i=i, data_input=data_out) and (current_position == 1):
+                current_position = 0
+                exit_price_list.append(cls.get_execution_price(raw_price=cls.target_price, direction=-1,
+                                                               commission_method=cls.comission_method,
+                                                               commission=cls.comission))
+                exit_index_list.append(i)
+
+            elif cls.check_short_target_exit_condition(i=i, data_input=data_out) and (current_position == -1):
+                current_position = 0
+                exit_price_list.append(cls.get_execution_price(raw_price=cls.target_price, direction=1,
+                                                               commission_method=cls.comission_method,
+                                                               commission=cls.comission))
+                exit_index_list.append(i)
+
+            elif cls.check_long_target_stop_condition(i=i, data_input=data_out) and (current_position == 1):
+                current_position = 0
+                exit_price_list.append(cls.get_execution_price(raw_price=cls.stop_price, direction=-1,
+                                                               commission_method=cls.comission_method,
+                                                               commission=cls.comission))
+                exit_index_list.append(i)
+
+            elif cls.check_short_target_stop_condition(i=i, data_input=data_out) and (current_position == -1):
+                current_position = 0
+                exit_price_list.append(cls.get_execution_price(raw_price=cls.stop_price, direction=1,
+                                                               commission_method=cls.comission_method,
+                                                               commission=cls.comission))
+                exit_index_list.append(i)
+
+            elif cls.check_long_entry_condition(i=i, data_input=data_out) and (current_position == 0):
                 current_position = 1
                 entry_price_list.append(cls.get_execution_price(i=i, data_input=data_out, direction=1,
                                                                 commission_method=cls.comission_method,
@@ -38,20 +84,6 @@ class Strategy:
                                                                 price_field=cls.execution_price_field))
                 entry_index_list.append(i)
                 quantity_list.append(cls.get_quantity(i=1, data_input=data_out, direction=-1))
-            elif cls.check_long_exit_condition(i=i, data_input=data_out) and (current_position == 1):
-                current_position = 0
-                exit_price_list.append(cls.get_execution_price(i=i, data_input=data_out, direction=-1,
-                                                               commission_method=cls.comission_method,
-                                                               commission=cls.comission,
-                                                               price_field=cls.execution_price_field))
-                exit_index_list.append(i)
-            elif cls.check_short_exit_condition(i=i, data_input=data_out) and (current_position == -1):
-                current_position = 0
-                exit_price_list.append(cls.get_execution_price(i=i, data_input=data_out, direction=1,
-                                                               commission_method=cls.comission_method,
-                                                               commission=cls.comission,
-                                                               price_field=cls.execution_price_field))
-                exit_index_list.append(i)
 
         if current_position != 0:
             exit_price_list.append(
@@ -88,8 +120,11 @@ class Strategy:
     @classmethod
     def get_execution_price(cls, **kwargs):
 
-        i = kwargs['i']
-        raw_price = cls.get_trade_instrument_data(i=i, data_input=kwargs['data_input'], field=kwargs['price_field'])
+        if 'raw_price' in kwargs.keys():
+            raw_price = kwargs['raw_price']
+        else:
+            i = kwargs['i']
+            raw_price = cls.get_trade_instrument_data(i=i, data_input=kwargs['data_input'], field=kwargs['price_field'])
         direction = kwargs['direction']
 
         if 'commission_method' in kwargs.keys():
@@ -105,11 +140,15 @@ class Strategy:
         if direction > 0:
             if commission_method == 'percent':
                 execution_price = raw_price * (1 + (commission / 100))
+            elif commission_method == 'fixed':
+                execution_price = raw_price + commission
             else:
                 execution_price = raw_price
         elif direction < 0:
             if commission_method == 'percent':
                 execution_price = raw_price * (1 - (commission / 100))
+            elif commission_method == 'fixed':
+                execution_price = raw_price - commission
             else:
                 execution_price = raw_price
 
@@ -134,11 +173,27 @@ class Strategy:
         return False
 
     @classmethod
+    def check_long_target_exit_condition(cls, **kwargs):
+        return False
+
+    @classmethod
+    def check_long_stop_exit_condition(cls, **kwargs):
+        return False
+
+    @classmethod
     def check_short_entry_condition(cls, **kwargs):
         return False
 
     @classmethod
     def check_short_exit_condition(cls, **kwargs):
+        return False
+
+    @classmethod
+    def check_short_target_exit_condition(cls, **kwargs):
+        return False
+
+    @classmethod
+    def check_short_stop_exit_condition(cls, **kwargs):
         return False
 
     @classmethod

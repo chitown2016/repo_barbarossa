@@ -48,6 +48,10 @@ def get_ib_contract_from_db_ticker(**kwargs):
 
     sec_type = kwargs['sec_type']
     ticker = kwargs['ticker']
+
+    #print(sec_type)
+    #print(ticker)
+
     contract_out = Contract()
     contract_specs_output = cmi.get_contract_specs(ticker)
     ticker_head = contract_specs_output['ticker_head']
@@ -108,6 +112,11 @@ def get_db_ticker_from_ib_contract(**kwargs):
     if sec_type=='STK':
         contract_output['ticker'] = ib_contract.symbol
         contract_output['instrument'] = 'S'
+        return contract_output
+
+    if sec_type=='BILL':
+        contract_output['ticker'] = ib_contract.symbol
+        contract_output['instrument'] = 'B'
         return contract_output
 
     ticker_head = conversion_from_ib_ticker_head[ib_contract.symbol]

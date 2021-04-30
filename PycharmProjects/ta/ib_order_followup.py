@@ -17,7 +17,7 @@ class ib_order_follow_up(subs.subscription):
 
     trade_frame = pd.DataFrame()
 
-    trade_assignment_by_tickerhead = {'LN': "LNQ19V19VCS"}
+    trade_assignment_by_tickerhead = {'C': "CU21N21VCS"}
 
     def orderStatus(self, orderId: OrderId, status: str, filled: float,remaining: float, avgFillPrice: float, permId: int,parentId: int, lastFillPrice: float, clientId: int,whyHeld: str, mktCapPrice: float):
         super().orderStatus(orderId, status, filled, remaining,avgFillPrice, permId, parentId, lastFillPrice, clientId, whyHeld, mktCapPrice)
@@ -31,8 +31,9 @@ class ib_order_follow_up(subs.subscription):
 
         trade_frame = self.trade_frame
 
-        if contract.secType != 'BAG':    # contract.secType != 'BAG':  contract.secType == 'FOP':
+        if contract.secType != 'BAG' and contract.secType != 'OPT':   # contract.secType != 'BAG':  contract.secType == 'FOP':
             print(contract)
+            print(contract.secType)
             db_ticker_output = ib_contract.get_db_ticker_from_ib_contract(ib_contract=contract)
             trade_frame.loc[len(trade_frame.index), 'ticker'] = db_ticker_output['ticker']
 
